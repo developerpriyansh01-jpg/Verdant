@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verdant – My Garden</title>
+    <meta name="description" content="Add and manage plants in your digital garden. Track watering statuses and pending botanical care tasks.">
+    <!-- Style Sheets -->
+    <link rel="stylesheet" href="verdant.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+    <style>
+        /* Garden layout specific adjustments */
+        .garden-grid {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 30px;
+            align-items: start;
+        }
+
+        .garden-top {
+            background: linear-gradient(135deg, rgba(22, 163, 74, 0.12) 0%, rgba(34, 197, 94, 0.04) 100%);
+            border: 1px solid var(--border-color);
+            padding: 25px 30px;
+            border-radius: var(--radius-lg);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .garden-top h2 {
+            color: var(--primary-dark);
+            font-size: 22px;
+            margin: 0;
+        }
+        body.dark .garden-top h2 { color: #fff; }
+
+        .plants-grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 20px;
+            margin-top: 25px;
+        }
+
+        .plant-card {
+            background: var(--bg-card);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            border: 1px solid var(--border-color);
+            padding: 20px;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-main);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            transition: var(--transition);
+        }
+
+        .plant-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(34, 197, 94, 0.25);
+        }
+
+        .plant-card img {
+            width: 100%;
+            height: 160px;
+            object-fit: cover;
+            border-radius: var(--radius-sm);
+        }
+
+        .plant-card h3 {
+            color: var(--primary-dark);
+            font-size: 18px;
+            margin: 0;
+        }
+        body.dark .plant-card h3 { color: #fff; }
+
+        .plant-card p {
+            font-size: 13.5px;
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        .plant-status {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            font-size: 13px;
+        }
+
+        .status-healthy {
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        .status-water {
+            color: #3b82f6;
+            font-weight: 600;
+        }
+
+        /* Task Cards */
+        .task-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .task-card {
+            background: rgba(22, 163, 74, 0.05);
+            border: 1px solid var(--border-color);
+            padding: 15px;
+            border-radius: var(--radius-md);
+            font-size: 13.5px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .task-card:hover {
+            border-color: var(--primary);
+            background: rgba(22, 163, 74, 0.08);
+            transform: translateX(3px);
+        }
+
+        .task-card.completed {
+            background: var(--primary-light);
+            color: var(--primary-dark);
+            border-color: var(--primary);
+            text-decoration: line-through;
+            opacity: 0.7;
+        }
+
+        /* Simple Modal Add Dialog */
+        .modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(8px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            padding: 20px;
+        }
+
+        .modal.open {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            width: 100%;
+            max-width: 450px;
+            padding: 25px;
+            box-shadow: var(--shadow-main);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            font-size: 20px;
+            color: var(--primary-dark);
+        }
+        body.dark .modal-header h3 { color: #fff; }
+
+        .modal-close {
+            background: transparent;
+            border: none;
+            font-size: 22px;
+            color: var(--text-muted);
+            cursor: pointer;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            background: var(--bg-main);
+            color: var(--text-main);
+            outline: none;
+            font-size: 14.5px;
+        }
+
+        @media(max-width: 1100px) {
+            .garden-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="logo">
+                <i class="fa-solid fa-leaf"></i>
+                <h2>Verdant</h2>
+            </div>
+            <ul>
+                <li><a href="index.html"><i class="fa-solid fa-house"></i> Home</a></li>
+                <li><a href="plant.html"><i class="fa-solid fa-seedling"></i> Plants</a></li>
+                <li><a href="scanner.html"><i class="fa-solid fa-camera"></i> AI Plant Scanner</a></li>
+                <li class="active"><a href="garden.html"><i class="fa-solid fa-tree"></i> My Garden</a></li>
+                <li><a href="water.html"><i class="fa-solid fa-droplet"></i> Water Saving</a></li>
+                <li><a href="report.html"><i class="fa-solid fa-triangle-exclamation"></i> Report Disease</a></li>
+                <li><a href="community.html"><i class="fa-solid fa-cloud-sun"></i> Season Care</a></li>
+                <li><a href="profile.html"><i class="fa-solid fa-user-circle"></i> My Profile</a></li>
+            </ul>
+        </aside>
+
+        <!-- Main Area -->
+        <main class="main">
+            <!-- Header bar -->
+            <nav>
+                <div class="search">
+                    <input type="text" id="searchGarden" placeholder="Search my plants...">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </div>
+                <div class="right">
+                    <i class="fa-solid fa-moon" id="themeBtn"></i>
+                    <span id="navTemp">28°C</span>
+                    <i class="fa-regular fa-bell" id="bellIcon"></i>
+                    <img src="assets/images/user.jpg" alt="User avatar" onerror="this.src='https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=100&h=100'">
+                </div>
+            </nav>
+
+            <div class="garden-grid">
+                
+                <!-- Plants Grid Left -->
+                <div class="content-left">
+                    <div style="margin-bottom: 25px;">
+                        <h1 style="color:var(--primary-dark); font-size:28px;">🌱 My Digital Garden</h1>
+                        <p style="color:var(--text-muted)">Manage plant profiles, monitor diagnostic logs, and set watering alarms.</p>
+                    </div>
+
+                    <!-- Top Bar -->
+                    <div class="garden-top">
+                        <div>
+                            <h2>My Active Plants</h2>
+                            <p id="plantCountText">3 Plants Saved</p>
+                        </div>
+                        <button class="btn" id="openAddModalBtn"><i class="fa-solid fa-plus"></i> Add Plant</button>
+                    </div>
+
+                    <!-- Plants Grid -->
+                    <div class="plants-grid-container" id="plantsGrid">
+                        
+                        <!-- Plant 1 -->
+                        <div class="plant-card">
+                            <img src="assets/images/moneyplant.jpg" alt="Money Plant" onerror="this.src='https://images.unsplash.com/photo-1545241047-6083a3684587?auto=format&fit=crop&w=300&h=200'">
+                            <h3>Money Plant</h3>
+                            <p>Indoor Decorative</p>
+                            <div class="plant-status">
+                                <span class="status-healthy">Healthy ✅</span>
+                                <span class="status-water"><i class="fa-solid fa-clock"></i> Water Today</span>
+                            </div>
+                        </div>
+
+                        <!-- Plant 2 -->
+                        <div class="plant-card">
+                            <img src="assets/images/tulsi.jpg" alt="Tulsi" onerror="this.src='https://images.unsplash.com/photo-1615228939096-9eba6cd74ff8?auto=format&fit=crop&w=300&h=200'">
+                            <h3>Tulsi</h3>
+                            <p>Medicinal Herb</p>
+                            <div class="plant-status">
+                                <span class="status-healthy">Healthy ✅</span>
+                                <span class="status-water"><i class="fa-solid fa-clock"></i> Tomorrow</span>
+                            </div>
+                        </div>
+
+                        <!-- Plant 3 -->
+                        <div class="plant-card">
+                            <img src="assets/images/aloe.jpg" alt="Aloe Vera" onerror="this.src='https://images.unsplash.com/photo-1596547609652-9cf5d8d76921?auto=format&fit=crop&w=300&h=200'">
+                            <h3>Aloe Vera</h3>
+                            <p>Desert Succulent</p>
+                            <div class="plant-status">
+                                <span class="status-healthy">Healthy ✅</span>
+                                <span class="status-water"><i class="fa-solid fa-clock"></i> In 5 Days</span>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Right Side Widgets -->
+                <div class="content-right">
+                    <div class="glass-card">
+                        <h3 style="color:var(--primary-dark); margin-bottom:5px;">📋 Garden Tasks</h3>
+                        <p style="font-size:11px; color:var(--text-muted); margin-bottom:15px;">Tap task cards to toggle completion.</p>
+                        
+                        <div class="task-list">
+                            <div class="task-card">
+                                <span>💧 Water Money Plant</span>
+                                <i class="fa-regular fa-circle-check"></i>
+                            </div>
+                            <div class="task-card">
+                                <span>☀️ Check sunlight exposures</span>
+                                <i class="fa-regular fa-circle-check"></i>
+                            </div>
+                            <div class="task-card">
+                                <span>🔍 Diagnostic check: Tulsi</span>
+                                <i class="fa-regular fa-circle-check"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Footer -->
+            <footer>
+                <div class="footer-content">
+                    <div class="footer-section">
+                        <h3>Verdant AI</h3>
+                        <p>Empowering plant parents with machine learning diagnostics, eco-friendly conservation algorithms, and direct botanical tools.</p>
+                    </div>
+                </div>
+                <div class="footer-bottom">
+                    <p>&copy; 2026 Verdant AI. All rights reserved.</p>
+                </div>
+            </footer>
+        </main>
+    </div>
+
+    <!-- Add Plant Modal -->
+    <div class="modal" id="addPlantModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add New Plant</h3>
+                <button class="modal-close" id="closeAddModalBtn">&times;</button>
+            </div>
+            <div class="form-group">
+                <label for="newPlantName">Plant Name</label>
+                <input type="text" id="newPlantName" class="form-control" placeholder="E.g., Money Plant, Rose">
+            </div>
+            <div class="form-group">
+                <label for="newPlantCategory">Category</label>
+                <select id="newPlantCategory" class="form-control">
+                    <option value="Indoor Decorative">Indoor Decorative</option>
+                    <option value="Outdoor Gardening">Outdoor Gardening</option>
+                    <option value="Medicinal Herb">Medicinal Herb</option>
+                    <option value="Desert Succulent">Desert Succulent</option>
+                </select>
+            </div>
+            <button class="btn" id="savePlantBtn" style="margin-top:10px;"><i class="fa-solid fa-floppy-disk"></i> Save Plant</button>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="verdant.js"></script>
+    <script>
+        // DOM Elements
+        const searchInput = document.getElementById("searchGarden");
+        const plantsGrid = document.getElementById("plantsGrid");
+        const plantCountText = document.getElementById("plantCountText");
+        
+        const openAddModalBtn = document.getElementById("openAddModalBtn");
+        const closeAddModalBtn = document.getElementById("closeAddModalBtn");
+        const addPlantModal = document.getElementById("addPlantModal");
+        
+        const newPlantName = document.getElementById("newPlantName");
+        const newPlantCategory = document.getElementById("newPlantCategory");
+        const savePlantBtn = document.getElementById("savePlantBtn");
+        const tasks = document.querySelectorAll(".task-card");
+
+        // Open/Close Modal
+        openAddModalBtn.addEventListener("click", () => addPlantModal.classList.add("open"));
+        closeAddModalBtn.addEventListener("click", () => addPlantModal.classList.remove("open"));
+        window.addEventListener("click", (e) => {
+            if (e.target === addPlantModal) addPlantModal.classList.remove("open");
+        });
+
+        // Save Plant
+        savePlantBtn.addEventListener("click", () => {
+            const name = newPlantName.value.trim();
+            const category = newPlantCategory.value;
+
+            if (!name) {
+                showToast("Please enter a plant name", "error");
+                newPlantName.focus();
+                return;
+            }
+
+            const card = document.createElement("div");
+            card.className = "plant-card";
+            card.innerHTML = `
+                <img src="assets/images/plant.jpg" alt="${name}" onerror="this.src='https://images.unsplash.com/photo-1545241047-6083a3684587?auto=format&fit=crop&w=300&h=200'">
+                <h3>${name}</h3>
+                <p>${category}</p>
+                <div class="plant-status">
+                    <span class="status-healthy">Healthy ✅</span>
+                    <span class="status-water"><i class="fa-solid fa-clock"></i> Today</span>
+                </div>
+            `;
+            
+            plantsGrid.appendChild(card);
+            
+            // Re-apply click trigger for newly created card details
+            bindDetailsClick(card);
+            
+            showToast(`${name} added to your digital garden!`);
+            
+            // Reset
+            newPlantName.value = "";
+            addPlantModal.classList.remove("open");
+            updateCount();
+        });
+
+        // Details click alert replacement
+        function bindDetailsClick(card) {
+            card.style.cursor = "pointer";
+            card.addEventListener("click", () => {
+                const name = card.querySelector("h3").textContent;
+                const category = card.querySelector("p").textContent;
+                const health = card.querySelector(".status-healthy").textContent;
+                const water = card.querySelector(".status-water").textContent;
+                
+                showToast(`🌿 Profile: ${name} (${category}) | ${health} | Next Water: ${water}`, "info");
+            });
+        }
+
+        // Bind for initial cards
+        document.querySelectorAll(".plant-card").forEach(bindDetailsClick);
+
+        // Search Filter
+        if (searchInput) {
+            searchInput.addEventListener("keyup", function() {
+                const query = this.value.toLowerCase();
+                document.querySelectorAll(".plant-card").forEach(card => {
+                    const name = card.querySelector("h3").textContent.toLowerCase();
+                    if (name.includes(query)) {
+                        card.style.display = "flex";
+                    } else {
+                        card.style.display = "none";
+                    }
+                });
+            });
+        }
+
+        // Task Cards Completed Toggle
+        tasks.forEach(task => {
+            task.addEventListener("click", () => {
+                task.classList.toggle("completed");
+                const icon = task.querySelector("i");
+                if (task.classList.contains("completed")) {
+                    icon.className = "fa-solid fa-circle-check";
+                    showToast("Task completed!");
+                } else {
+                    icon.className = "fa-regular fa-circle-check";
+                }
+            });
+        });
+
+        // Update active count
+        function updateCount() {
+            const count = document.querySelectorAll(".plant-card").length;
+            plantCountText.textContent = `${count} Plants Saved`;
+        }
+
+        updateCount();
+
+        // Notification Bell
+        const bell = document.getElementById("bellIcon");
+        if (bell) {
+            bell.addEventListener("click", () => {
+                showToast("🔔 Active Garden monitoring operational.", "info");
+            });
+        }
+    </script>
+</body>
+</html>

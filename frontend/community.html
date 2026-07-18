@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verdant – Season Care Guide</title>
+    <meta name="description" content="Learn plant care guidelines customized for Summer, Winter, Spring, and Rainy seasons.">
+    <!-- Style Sheets -->
+    <link rel="stylesheet" href="verdant.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+    <style>
+        /* Season Care grid adjustments */
+        .season-grid {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 30px;
+            align-items: start;
+        }
+
+        .seasons-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+            margin-top: 25px;
+        }
+
+        .season-card {
+            background: var(--bg-card);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            border: 1px solid var(--border-color);
+            padding: 25px;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-main);
+            transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .season-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+        }
+
+        .season-card i {
+            font-size: 40px;
+        }
+
+        .season-card.summer i { color: #f59e0b; }
+        .season-card.rain i { color: #3b82f6; }
+        .season-card.winter i { color: #6366f1; }
+        .season-card.spring i { color: var(--accent); }
+
+        .season-card h2 {
+            font-size: 20px;
+            color: var(--primary-dark);
+            margin: 0;
+        }
+        body.dark .season-card h2 { color: #fff; }
+
+        .season-card ul {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            font-size: 13.5px;
+            color: var(--text-muted);
+            padding-left: 0;
+        }
+
+        .season-card li {
+            position: relative;
+            padding-left: 20px;
+        }
+
+        .season-card li::before {
+            content: '•';
+            position: absolute;
+            left: 5px;
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        /* Highlight current season */
+        .season-card.active-season {
+            border: 2px solid var(--primary);
+            box-shadow: 0 0 20px rgba(34, 197, 94, 0.25);
+            transform: scale(1.02);
+        }
+
+        @media(max-width: 1100px) {
+            .season-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="logo">
+                <i class="fa-solid fa-leaf"></i>
+                <h2>Verdant</h2>
+            </div>
+            <ul>
+                <li><a href="index.html"><i class="fa-solid fa-house"></i> Home</a></li>
+                <li><a href="plant.html"><i class="fa-solid fa-seedling"></i> Plants</a></li>
+                <li><a href="scanner.html"><i class="fa-solid fa-camera"></i> AI Plant Scanner</a></li>
+                <li><a href="garden.html"><i class="fa-solid fa-tree"></i> My Garden</a></li>
+                <li><a href="water.html"><i class="fa-solid fa-droplet"></i> Water Saving</a></li>
+                <li><a href="report.html"><i class="fa-solid fa-triangle-exclamation"></i> Report Disease</a></li>
+                <li class="active"><a href="community.html"><i class="fa-solid fa-cloud-sun"></i> Season Care</a></li>
+                <li><a href="profile.html"><i class="fa-solid fa-user-circle"></i> My Profile</a></li>
+            </ul>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main">
+            <!-- Header bar -->
+            <nav>
+                <div class="search">
+                    <input type="text" id="searchSeason" placeholder="Search season guides...">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </div>
+                <div class="right">
+                    <i class="fa-solid fa-moon" id="themeBtn"></i>
+                    <span id="navTemp">28°C</span>
+                    <i class="fa-regular fa-bell" id="bellIcon"></i>
+                    <img src="assets/images/user.jpg" alt="User avatar" onerror="this.src='https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=100&h=100'">
+                </div>
+            </nav>
+
+            <div class="season-grid">
+                
+                <!-- Left Main Panel -->
+                <div class="content-left">
+                    <div style="margin-bottom: 25px;">
+                        <h1 style="color:var(--primary-dark); font-size:28px;">🌦️ Season Care Guide</h1>
+                        <p style="color:var(--text-muted)">Get customized schedules and biological guidelines for all seasonal transitions.</p>
+                    </div>
+
+                    <div class="seasons-container">
+                        <!-- Summer -->
+                        <div class="season-card summer" data-season="summer">
+                            <i class="fa-solid fa-sun"></i>
+                            <h2>Summer Care</h2>
+                            <ul>
+                                <li>Water plants in morning or evening.</li>
+                                <li>Protect sensitive plants from direct midday heat.</li>
+                                <li>Keep soil moisture levels maintained with mulches.</li>
+                                <li>Provide shading screens when UV indexes peak.</li>
+                            </ul>
+                        </div>
+
+                        <!-- Rainy -->
+                        <div class="season-card rain" data-season="rain">
+                            <i class="fa-solid fa-cloud-rain"></i>
+                            <h2>Rainy Season</h2>
+                            <ul>
+                                <li>Avoid excess manual watering.</li>
+                                <li>Clear drain holes to prevent waterlogging.</li>
+                                <li>Monitor leaves weekly for molds and fungi.</li>
+                                <li>Ensure clean foliage to maximize absorption.</li>
+                            </ul>
+                        </div>
+
+                        <!-- Winter -->
+                        <div class="season-card winter" data-season="winter">
+                            <i class="fa-solid fa-snowflake"></i>
+                            <h2>Winter Care</h2>
+                            <ul>
+                                <li>Reduce overall watering frequency.</li>
+                                <li>Position pots to catch maximum morning light.</li>
+                                <li>Shield delicate species from frost drafts.</li>
+                                <li>Hold off on major fertilizer application.</li>
+                            </ul>
+                        </div>
+
+                        <!-- Spring -->
+                        <div class="season-card spring" data-season="spring">
+                            <i class="fa-solid fa-seedling"></i>
+                            <h2>Spring Care</h2>
+                            <ul>
+                                <li>Ideal timing for repotting/planting.</li>
+                                <li>Mix in fresh compost top dressings.</li>
+                                <li>Prune away yellowed winter leaves.</li>
+                                <li>Nurture emerging new growths.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Info Sidebar Right -->
+                <div class="content-right">
+                    <div class="glass-card">
+                        <h3 style="color:var(--primary-dark); margin-bottom:15px;">💡 Seasonal Tip</h3>
+                        <div class="tip-box" id="tipBox" style="min-height:80px; font-size:13.5px; line-height:1.6; color:var(--text-muted);">
+                            <p>Always check soil moisture before watering your plant.</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Footer -->
+            <footer>
+                <div class="footer-content">
+                    <div class="footer-section">
+                        <h3>Verdant AI</h3>
+                        <p>Empowering plant parents with machine learning diagnostics, eco-friendly conservation algorithms, and direct botanical tools.</p>
+                    </div>
+                </div>
+                <div class="footer-bottom">
+                    <p>&copy; 2026 Verdant AI. All rights reserved.</p>
+                </div>
+            </footer>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="verdant.js"></script>
+    <script>
+        const searchInput = document.getElementById("searchSeason");
+        const seasonCards = document.querySelectorAll(".season-card");
+        const tipText = document.querySelector("#tipBox p");
+
+        // Search options
+        if (searchInput) {
+            searchInput.addEventListener("keyup", function() {
+                const query = this.value.toLowerCase();
+                seasonCards.forEach(card => {
+                    if (card.textContent.toLowerCase().includes(query)) {
+                        card.style.display = "flex";
+                    } else {
+                        card.style.display = "none";
+                    }
+                });
+            });
+        }
+
+        // Card clicks display toast
+        seasonCards.forEach(card => {
+            card.addEventListener("click", () => {
+                const title = card.querySelector("h2").textContent;
+                showToast(`🌦️ Guide Loaded: ${title}`, "info");
+            });
+        });
+
+        // Tip list rotation
+        const rotationalTips = [
+            "🌱 Check soil moisture before watering your plants.",
+            "💧 Water plants early in the morning.",
+            "☀️ Keep indoor plants near sunlight spots.",
+            "🍂 Remove dry and yellow leaves regularly.",
+            "🌿 Apply organic compost once every month.",
+            "🐛 Inspect leaves weekly for pests."
+        ];
+
+        let tipIndex = 0;
+        if (tipText) {
+            setInterval(() => {
+                tipIndex = (tipIndex + 1) % rotationalTips.length;
+                tipText.style.opacity = "0";
+                setTimeout(() => {
+                    tipText.textContent = rotationalTips[tipIndex];
+                    tipText.style.opacity = "1";
+                }, 300);
+            }, 6000);
+        }
+
+        // Detect and highlight current season
+        const currentMonth = new Date().getMonth() + 1; // 1-indexed
+        let matchedSeason = "";
+        
+        if (currentMonth >= 3 && currentMonth <= 5) {
+            matchedSeason = "spring";
+        } else if (currentMonth >= 6 && currentMonth <= 8) {
+            matchedSeason = "rain";
+        } else if (currentMonth >= 9 && currentMonth <= 10) {
+            matchedSeason = "summer";
+        } else {
+            matchedSeason = "winter";
+        }
+
+        const activeCard = document.querySelector(`.season-card.${matchedSeason}`);
+        if (activeCard) {
+            activeCard.classList.add("active-season");
+            showToast(`🌦️ Automatically highlighting current season: ${matchedSeason.toUpperCase()}`, "info");
+        }
+
+        // Notification Bell
+        const bell = document.getElementById("bellIcon");
+        if (bell) {
+            bell.addEventListener("click", () => {
+                showToast("🔔 Season Care alerts is set to auto-sync.", "info");
+            });
+        }
+    </script>
+</body>
+</html>

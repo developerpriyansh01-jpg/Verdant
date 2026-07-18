@@ -1,0 +1,349 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+
+body {
+    background: #f1f8f3;
+    color: #1f2937;
+}
+
+
+.container {
+    display: flex;
+    min-height: 100vh;
+}
+
+
+/* ================= SIDEBAR ================= */
+
+.sidebar {
+    width: 270px;
+    min-height: 100vh;
+    background: linear-gradient(180deg, #14532d, #166534);
+    color: white;
+    padding: 25px 18px;
+    position: sticky;
+    top: 0;
+}
+
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px;
+    margin-bottom: 35px;
+}
+
+
+.logo i {
+    font-size: 32px;
+    color: #86efac;
+}
+
+
+.logo h2 {
+    font-size: 26px;
+    letter-spacing: 1px;
+}
+
+
+.sidebar ul {
+    list-style: none;
+}
+
+
+.sidebar ul li {
+    margin: 8px 0;
+    border-radius: 15px;
+    transition: .3s;
+}
+
+
+.sidebar ul li a {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 14px 16px;
+    color: #dcfce7;
+    text-decoration: none;
+    font-size: 15px;
+}
+
+
+.sidebar ul li i {
+    width: 22px;
+    font-size: 18px;
+}
+
+
+.sidebar ul li:hover {
+    background: rgba(255, 255, 255, .15);
+    transform: translateX(5px);
+}
+
+
+.sidebar ul li.active {
+    background: #22c55e;
+    box-shadow: 0 8px 20px rgba(34, 197, 94, .3);
+}
+
+
+.sidebar ul li.active a {
+    color: white;
+    font-weight: 600;
+}
+
+
+
+
+/* ================= MAIN ================= */
+
+.main {
+    flex: 1;
+    padding: 25px;
+}
+
+
+
+nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+
+.search {
+    background: white;
+    width: 350px;
+    padding: 12px 20px;
+    border-radius: 30px;
+    display: flex;
+    justify-content: space-between;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, .05);
+}
+
+
+.search input {
+    border: none;
+    outline: none;
+    width: 90%;
+}
+
+
+
+.right {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+}
+
+
+.right img {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+
+
+/* ================= HERO ================= */
+
+
+.hero {
+    margin-top: 30px;
+    padding: 35px;
+    background: #dcfce7;
+    border-radius: 25px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+
+.hero h1 {
+    color: #166534;
+    font-size: 38px;
+}
+
+
+.hero p {
+    margin: 15px 0;
+    font-size: 18px;
+}
+
+
+.hero img {
+    width: 350px;
+    height: 220px;
+    object-fit: cover;
+    border-radius: 20px;
+}
+
+
+
+
+button {
+    background: #16a34a;
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: .3s;
+}
+
+
+button:hover {
+    background: #15803d;
+}
+
+
+
+
+
+/* ================= CARDS ================= */
+
+
+.title {
+    margin: 35px 0 20px;
+}
+
+
+.cards {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+}
+
+
+
+.card {
+    background: white;
+    padding: 25px;
+    border-radius: 20px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, .08);
+}
+
+
+.card i {
+    font-size: 35px;
+    color: #22c55e;
+    margin-bottom: 15px;
+}
+
+
+.card h3 {
+    margin-bottom: 10px;
+}
+
+
+
+
+/* ================= TIPS ================= */
+
+
+.tips {
+    margin-top: 30px;
+    background: white;
+    padding: 25px;
+    border-radius: 20px;
+}
+
+
+.tips p {
+    margin: 12px 0;
+}
+
+
+
+
+/* ================= RIGHT PANEL ================= */
+
+
+.result {
+    width: 300px;
+    background: white;
+    padding: 25px;
+}
+
+
+.weather {
+    text-align: center;
+    padding: 25px 0;
+}
+
+
+.weather i {
+    font-size: 50px;
+    color: #22c55e;
+}
+
+
+.result button {
+    width: 100%;
+    margin: 10px 0;
+}
+
+
+
+
+
+/* ================= RESPONSIVE ================= */
+
+
+@media(max-width:1100px) {
+
+    .container {
+        flex-direction: column;
+    }
+
+
+    .sidebar {
+        width: 100%;
+        position: relative;
+    }
+
+
+    .cards {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+
+    .result {
+        width: 100%;
+    }
+
+
+    .hero {
+        flex-direction: column;
+        gap: 20px;
+    }
+
+}
+
+
+
+@media(max-width:600px) {
+
+    .cards {
+        grid-template-columns: 1fr;
+    }
+
+
+    .search {
+        width: 220px;
+    }
+
+
+    .hero img {
+        width: 100%;
+        height: auto;
+    }
+
+}

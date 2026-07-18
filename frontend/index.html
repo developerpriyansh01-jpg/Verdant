@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verdant – Smart Plant Care & Disease Detection</title>
+    <meta name="description" content="Verdant is an AI-powered smart plant care system. Upload leaf photos to detect diseases, get customized treatment and watering tips.">
+    <!-- Style Sheets -->
+    <link rel="stylesheet" href="verdant.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+    <style>
+        /* Hero Animation & Typist styling */
+        .hero {
+            position: relative;
+            background: linear-gradient(135deg, rgba(22, 163, 74, 0.15) 0%, rgba(34, 197, 94, 0.05) 100%);
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 50px;
+            border-radius: var(--radius-lg);
+            gap: 20px;
+        }
+        
+        .hero::before {
+            content: '';
+            position: absolute;
+            width: 150px;
+            height: 150px;
+            background: var(--accent);
+            filter: blur(80px);
+            opacity: 0.15;
+            top: -20px;
+            right: -20px;
+            border-radius: 50%;
+        }
+
+        .hero h1 {
+            font-size: 42px;
+            color: var(--primary-dark);
+            line-height: 1.2;
+            margin-bottom: 15px;
+        }
+
+        body.dark .hero h1 {
+            color: #fff;
+        }
+
+        .typing-text::after {
+            content: '|';
+            animation: blink 0.8s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        .hero-image {
+            width: 400px;
+            height: 250px;
+            object-fit: cover;
+            border-radius: var(--radius-md);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+            transition: var(--transition);
+        }
+
+        .hero-image:hover {
+            transform: scale(1.03) rotate(1deg);
+        }
+
+        /* Section Headings */
+        .section-title-home {
+            font-size: 26px;
+            margin: 40px 0 20px;
+            color: var(--primary-dark);
+            font-weight: 700;
+        }
+        body.dark .section-title-home { color: #fff; }
+
+        /* Process Steps */
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 25px;
+            margin-top: 20px;
+        }
+
+        .step-card {
+            text-align: center;
+            padding: 30px 20px;
+        }
+
+        .step-num {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--primary-light);
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: 700;
+            margin: 0 auto 15px;
+        }
+
+        /* Testimonials */
+        .testimonials {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 25px;
+        }
+
+        .testi-card {
+            position: relative;
+        }
+
+        .testi-user {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .testi-user img {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+        }
+
+        /* FAQ Accordion */
+        .faq-item {
+            border-bottom: 1px solid var(--border-color);
+            padding: 15px 0;
+            cursor: pointer;
+        }
+
+        .faq-question {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+            color: var(--text-muted);
+            font-size: 14px;
+            margin-top: 8px;
+            line-height: 1.6;
+        }
+
+        .faq-item.active .faq-answer {
+            max-height: 100px;
+        }
+
+        .faq-item i {
+            transition: var(--transition);
+        }
+
+        .faq-item.active i {
+            transform: rotate(180deg);
+            color: var(--primary);
+        }
+
+        /* Layout modifications */
+        .grid-layout {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 30px;
+        }
+
+        @media(max-width: 1200px) {
+            .grid-layout {
+                grid-template-columns: 1fr;
+            }
+            .hero {
+                flex-direction: column;
+                text-align: center;
+            }
+            .hero-image {
+                width: 100%;
+                max-width: 400px;
+            }
+            .steps, .testimonials {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="logo">
+                <i class="fa-solid fa-leaf"></i>
+                <h2>Verdant</h2>
+            </div>
+            <ul>
+                <li class="active"><a href="index.html"><i class="fa-solid fa-house"></i> Home</a></li>
+                <li><a href="plant.html"><i class="fa-solid fa-seedling"></i> Plants</a></li>
+                <li><a href="scanner.html"><i class="fa-solid fa-camera"></i> AI Plant Scanner</a></li>
+                <li><a href="garden.html"><i class="fa-solid fa-tree"></i> My Garden</a></li>
+                <li><a href="water.html"><i class="fa-solid fa-droplet"></i> Water Saving</a></li>
+                <li><a href="report.html"><i class="fa-solid fa-triangle-exclamation"></i> Report Disease</a></li>
+                <li><a href="community.html"><i class="fa-solid fa-cloud-sun"></i> Season Care</a></li>
+                <li><a href="profile.html"><i class="fa-solid fa-user-circle"></i> My Profile</a></li>
+            </ul>
+        </aside>
+
+        <!-- Main Area -->
+        <main class="main">
+            <!-- Header bar -->
+            <nav>
+                <div class="search">
+                    <input type="text" placeholder="Search Plants...">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </div>
+                <div class="right">
+                    <i class="fa-solid fa-moon" id="themeBtn"></i>
+                    <span id="navTemp">28°C</span>
+                    <i class="fa-regular fa-bell" id="bellIcon"></i>
+                    <img src="assets/images/user.jpg" alt="User avatar" onerror="this.src='https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=100&h=100'">
+                </div>
+            </nav>
+
+            <div class="grid-layout">
+                <!-- Left panel contents -->
+                <div class="content-left">
+                    <!-- Hero Section -->
+                    <section class="hero">
+                        <div style="flex: 1;">
+                            <h1>Discover <br><span class="typing-text" id="typingText"></span></h1>
+                            <p>Protect your greens with high-precision AI scanning, customized care advice, and eco-friendly watering solutions.</p>
+                            <a href="scanner.html" class="btn"><i class="fa-solid fa-camera-retro"></i> Start Scanning</a>
+                        </div>
+                        <img src="assets/images/garden.jpg" class="hero-image" alt="Verdant garden illustration" onerror="this.src='https://images.unsplash.com/photo-1466692476868-aef1dfb1e735?auto=format&fit=crop&w=400&h=250'">
+                    </section>
+
+                    <!-- Fast Cards Section -->
+                    <h2 class="section-title-home">Plant Health Overview</h2>
+                    <div class="cards" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+                        <div class="card glass-card" onclick="window.location.href='garden.html'">
+                            <i class="fa-solid fa-seedling"></i>
+                            <h3>My Plants</h3>
+                            <p>12 Plants Active</p>
+                        </div>
+                        <div class="card glass-card" onclick="window.location.href='water.html'">
+                            <i class="fa-solid fa-droplet"></i>
+                            <h3>Water Status</h3>
+                            <p>Healthy hydration levels</p>
+                        </div>
+                        <div class="card glass-card" onclick="window.location.href='scanner.html'">
+                            <i class="fa-solid fa-heart-pulse"></i>
+                            <h3>AI Scanner</h3>
+                            <p>Quick health diagnosis</p>
+                        </div>
+                        <div class="card glass-card" onclick="window.location.href='report.html'">
+                            <i class="fa-solid fa-triangle-exclamation"></i>
+                            <h3>Report Issue</h3>
+                            <p>Connect with botanists</p>
+                        </div>
+                    </div>
+
+                    <!-- How It Works -->
+                    <h2 class="section-title-home">How It Works</h2>
+                    <section class="steps">
+                        <div class="step-card glass-card">
+                            <div class="step-num">1</div>
+                            <h4>Capture Leaf Photo</h4>
+                            <p>Take a direct image of the infected leaf using your phone or web camera.</p>
+                        </div>
+                        <div class="step-card glass-card">
+                            <div class="step-num">2</div>
+                            <h4>Instant AI Analysis</h4>
+                            <p>Our deep learning models check for spots, blights, and deficiencies.</p>
+                        </div>
+                        <div class="step-card glass-card">
+                            <div class="step-num">3</div>
+                            <h4>Get Organic Remedies</h4>
+                            <p>Receive detailed treatment steps, watering guidelines, and care recommendations.</p>
+                        </div>
+                    </section>
+
+                    <!-- Testimonials -->
+                    <h2 class="section-title-home">What Gardeners Say</h2>
+                    <section class="testimonials">
+                        <div class="testi-card glass-card">
+                            <p>"Verdant saved my heirloom tomatoes! The scanner diagnosed Early Blight instantly, and the baking soda treatment worked wonders."</p>
+                            <div class="testi-user">
+                                <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=100&h=100" alt="Sarah J.">
+                                <div>
+                                    <h5>Sarah Jenkins</h5>
+                                    <p style="font-size:12px; color:var(--text-muted)">Urban Farmer</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="testi-card glass-card">
+                            <p>"The water saving suggestions and local season care guide are absolutely fantastic. Highly recommend this tool for every plant lover!"</p>
+                            <div class="testi-user">
+                                <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=100&h=100" alt="Sarah J.">
+                                <div>
+                                    <h5>Robert Chen</h5>
+                                    <p style="font-size:12px; color:var(--text-muted)">Hobbyist Botanist</p>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- FAQ Section -->
+                    <h2 class="section-title-home">Frequently Asked Questions</h2>
+                    <section class="glass-card">
+                        <div class="faq-item">
+                            <div class="faq-question">How accurate is the AI Scanner? <i class="fa-solid fa-chevron-down"></i></div>
+                            <div class="faq-answer">The AI Model is trained on the high-quality PlantVillage dataset containing over 54,000 leaf images, achieving over 96% classification accuracy.</div>
+                        </div>
+                        <div class="faq-item">
+                            <div class="faq-question">What plants are supported? <i class="fa-solid fa-chevron-down"></i></div>
+                            <div class="faq-answer">Currently, we support common garden plants including Tomato, Rose, Pepper, Potato, Apple, Grape, Aloe Vera, and Tulsi.</div>
+                        </div>
+                        <div class="faq-item">
+                            <div class="faq-question">Can I use the app offline? <i class="fa-solid fa-chevron-down"></i></div>
+                            <div class="faq-answer">You can access the home page, plant library, and scan history offline. The scanner features a local demo fallback.</div>
+                        </div>
+                    </section>
+                </div>
+
+                <!-- Right panel contents (Widgets) -->
+                <div class="content-right">
+                    <div class="glass-card" style="text-align: center; margin-bottom: 25px;">
+                        <h3>Today's Weather</h3>
+                        <div class="weather" style="padding: 15px 0;">
+                            <i class="fa-solid fa-cloud-sun" style="font-size: 50px; color: var(--primary);"></i>
+                            <h2 style="font-size: 32px; margin-top:10px;">28°C</h2>
+                            <p style="color: var(--text-muted); font-size:13px; margin-top:5px;">Excellent day for outdoor gardening!</p>
+                        </div>
+                    </div>
+
+                    <div class="tips glass-card">
+                        <h3 style="margin-bottom: 15px; color: var(--primary-dark)">🌿 Today's Tips</h3>
+                        <div id="tipBox">
+                            <p>• Water plants in morning for better growth.</p>
+                            <p>• Keep indoor plants near sunlight.</p>
+                            <p>• Check leaves regularly for diseases.</p>
+                        </div>
+                    </div>
+
+                    <div class="glass-card" style="margin-top:25px;">
+                        <h3 style="margin-bottom: 15px;">Quick Links</h3>
+                        <div style="display:flex; flex-direction:column; gap:10px;">
+                            <a href="scanner.html" class="btn" style="width:100%"><i class="fa-solid fa-camera"></i> Live Scan</a>
+                            <a href="report.html" class="btn btn-outline" style="width:100%"><i class="fa-solid fa-circle-info"></i> Report Problem</a>
+                            <a href="garden.html" class="btn btn-outline" style="width:100%"><i class="fa-solid fa-plus"></i> Add Garden Entry</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer component inside main content panel -->
+            <footer>
+                <div class="footer-content">
+                    <div class="footer-section">
+                        <h3>Verdant AI</h3>
+                        <p>Empowering plant parents with machine learning diagnostics, eco-friendly conservation algorithms, and direct botanical tools.</p>
+                        <div class="social-icons">
+                            <a href="#"><i class="fa-brands fa-facebook"></i></a>
+                            <a href="#"><i class="fa-brands fa-instagram"></i></a>
+                            <a href="#"><i class="fa-brands fa-twitter"></i></a>
+                            <a href="#"><i class="fa-brands fa-github"></i></a>
+                        </div>
+                    </div>
+                    <div class="footer-section">
+                        <h3>Quick Navigation</h3>
+                        <ul>
+                            <li><a href="index.html">Dashboard Home</a></li>
+                            <li><a href="plant.html">Plant Library</a></li>
+                            <li><a href="scanner.html">AI Leaf Scanner</a></li>
+                            <li><a href="garden.html">My Digital Garden</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-section">
+                        <h3>Contact Info</h3>
+                        <ul>
+                            <li><a href="#"><i class="fa-solid fa-envelope"></i> contact@verdant-app.io</a></li>
+                            <li><a href="#"><i class="fa-solid fa-phone"></i> +1 (555) 234-9871</a></li>
+                            <li><a href="#"><i class="fa-solid fa-location-dot"></i> San Francisco, CA</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="footer-bottom">
+                    <p>&copy; 2026 Verdant AI. All rights reserved. Designed with ❤️ for a greener planet.</p>
+                </div>
+            </footer>
+        </main>
+    </div>
+
+    <!-- Global Module Script -->
+    <script src="verdant.js"></script>
+    <script>
+        // Typing Effect implementation
+        const phrases = ["Smart Plant Care.", "Fungal Spot Detection.", "AI Disease Diagnostics.", "Organic Gardening Tips."];
+        let phraseIdx = 0;
+        let charIdx = 0;
+        const target = document.getElementById("typingText");
+        
+        function type() {
+            if (charIdx < phrases[phraseIdx].length) {
+                target.textContent += phrases[phraseIdx].charAt(charIdx);
+                charIdx++;
+                setTimeout(type, 100);
+            } else {
+                setTimeout(erase, 2000);
+            }
+        }
+
+        function erase() {
+            if (charIdx > 0) {
+                target.textContent = phrases[phraseIdx].substring(0, charIdx - 1);
+                charIdx--;
+                setTimeout(erase, 50);
+            } else {
+                phraseIdx = (phraseIdx + 1) % phrases.length;
+                setTimeout(type, 300);
+            }
+        }
+        
+        if (target) {
+            setTimeout(type, 500);
+        }
+
+        // Today's plant tips cycling
+        const tipQuotes = [
+            "🌱 Water plants early in the morning.",
+            "☀️ Give at least 5 hours of sunlight.",
+            "💧 Don't overwater indoor plants.",
+            "🍂 Remove dry leaves regularly.",
+            "🌿 Use organic compost every month.",
+            "🌬️ Keep air circulating around leaves.",
+            "🧤 Sterilize garden shears before pruning."
+        ];
+        
+        const tipBox = document.getElementById("tipBox");
+        if (tipBox) {
+            let index = 0;
+            setInterval(() => {
+                tipBox.innerHTML = `
+                    <p>${tipQuotes[index % tipQuotes.length]}</p>
+                    <p>${tipQuotes[(index + 1) % tipQuotes.length]}</p>
+                    <p>${tipQuotes[(index + 2) % tipQuotes.length]}</p>
+                `;
+                index = (index + 1) % tipQuotes.length;
+            }, 6000);
+        }
+
+        // FAQ Toggle functionality
+        const faqItems = document.querySelectorAll(".faq-item");
+        faqItems.forEach(item => {
+            item.addEventListener("click", () => {
+                const isActive = item.classList.contains("active");
+                faqItems.forEach(el => el.classList.remove("active"));
+                if (!isActive) {
+                    item.classList.add("active");
+                }
+            });
+        });
+
+        // Notifications
+        const bell = document.getElementById("bellIcon");
+        if (bell) {
+            bell.addEventListener("click", () => {
+                showToast("🔔 You are completely caught up! No new notifications.", "info");
+            });
+        }
+    </script>
+</body>
+</html>

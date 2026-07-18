@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verdant – Login</title>
+    <!-- Style Sheets -->
+    <link rel="stylesheet" href="verdant.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+    <style>
+        .auth-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: linear-gradient(135deg, rgba(22, 163, 74, 0.15) 0%, rgba(34, 197, 94, 0.05) 100%);
+        }
+
+        .auth-card {
+            width: 100%;
+            max-width: 420px;
+            padding: 40px 30px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-main);
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .auth-header {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .auth-header i {
+            font-size: 45px;
+            color: var(--primary);
+            animation: bounce 2s infinite alternate;
+        }
+
+        @keyframes bounce {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-8px); }
+        }
+
+        .auth-header h2 {
+            font-size: 28px;
+            color: var(--primary-dark);
+            font-weight: 700;
+        }
+        body.dark .auth-header h2 { color: #fff; }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-group label {
+            font-size: 13.5px;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .form-control-wrap {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .form-control-wrap i {
+            position: absolute;
+            left: 15px;
+            color: var(--text-muted);
+            font-size: 16px;
+        }
+
+        .form-control-wrap input {
+            width: 100%;
+            padding: 12px 16px 12px 45px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            background: var(--bg-main);
+            color: var(--text-main);
+            outline: none;
+            font-size: 14.5px;
+            transition: var(--transition);
+        }
+
+        .form-control-wrap input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 10px rgba(22, 163, 74, 0.15);
+        }
+
+        .auth-btn {
+            width: 100%;
+            padding: 14px;
+            font-size: 15px;
+            margin-top: 10px;
+        }
+
+        .auth-footer {
+            text-align: center;
+            font-size: 13.5px;
+            color: var(--text-muted);
+        }
+
+        .auth-footer a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+
+        .auth-footer a:hover {
+            color: var(--primary-hover);
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Floating Theme Switcher -->
+    <div style="position: absolute; top: 20px; right: 20px; z-index: 100;">
+        <button class="btn btn-outline" id="themeBtn" style="padding: 10px 15px; border-radius: 50%;"><i class="fa-solid fa-moon"></i></button>
+    </div>
+
+    <div class="auth-container">
+        <div class="auth-card">
+            
+            <div class="auth-header">
+                <i class="fa-solid fa-leaf"></i>
+                <h2>Verdant login</h2>
+                <p style="color:var(--text-muted); font-size:13.5px;">Sign in to check diagnostics and save plant records.</p>
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:16px;">
+                <!-- Username/Email -->
+                <div class="form-group">
+                    <label for="usernameInput">Username or Email</label>
+                    <div class="form-control-wrap">
+                        <i class="fa-solid fa-user"></i>
+                        <input type="text" id="usernameInput" placeholder="Enter username or email address">
+                    </div>
+                </div>
+
+                <!-- Password -->
+                <div class="form-group">
+                    <label for="passwordInput">Password</label>
+                    <div class="form-control-wrap">
+                        <i class="fa-solid fa-lock"></i>
+                        <input type="password" id="passwordInput" placeholder="Enter security password">
+                    </div>
+                </div>
+
+                <button class="btn auth-btn" id="loginBtn"><i class="fa-solid fa-arrow-right-to-bracket"></i> Sign In</button>
+            </div>
+
+            <div class="auth-footer">
+                Don't have a profile? <a href="register.html">Sign Up Now</a>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="verdant.js"></script>
+    <script>
+        const usernameInput = document.getElementById("usernameInput");
+        const passwordInput = document.getElementById("passwordInput");
+        const loginBtn = document.getElementById("loginBtn");
+
+        // Submit action
+        loginBtn.addEventListener("click", async () => {
+            const usernameOrEmail = usernameInput.value.trim();
+            const password = passwordInput.value;
+
+            if (!usernameOrEmail) {
+                showToast("Please enter username or email", "error");
+                usernameInput.focus();
+                return;
+            }
+
+            if (!password) {
+                showToast("Please enter password", "error");
+                passwordInput.focus();
+                return;
+            }
+
+            // Disable button & loading feedback
+            loginBtn.disabled = true;
+            loginBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Authenticating...';
+
+            try {
+                const res = await fetch("http://localhost:5001/login", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        username_or_email: usernameOrEmail,
+                        password: password
+                    })
+                });
+
+                const data = await res.json();
+                if (!res.ok) {
+                    throw new Error(data.error || "Authentication failed.");
+                }
+
+                // Save token & user
+                localStorage.setItem("verdant_token", data.token);
+                showToast("Welcome back! Loading dashboard...", "success");
+                
+                setTimeout(() => {
+                    window.location.href = "index.html";
+                }, 1000);
+            } catch (err) {
+                console.error(err);
+                showToast(err.message, "error");
+            } finally {
+                loginBtn.disabled = false;
+                loginBtn.innerHTML = '<i class="fa-solid fa-arrow-right-to-bracket"></i> Sign In';
+            }
+        });
+
+        // Trigger enter key submit
+        passwordInput.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") loginBtn.click();
+        });
+    </script>
+</body>
+</html>

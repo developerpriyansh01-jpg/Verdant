@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verdant – Report Plant Disease</title>
+    <meta name="description" content="Report a plant disease or anomaly to the Verdant database for botanist review and care advice.">
+    <!-- Style Sheets -->
+    <link rel="stylesheet" href="verdant.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+    <style>
+        /* Form Page layout modifications */
+        .report-grid {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 30px;
+            align-items: start;
+        }
+
+        .report-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            padding: 30px;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-main);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--text-main);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-main);
+            color: var(--text-main);
+            border-radius: var(--radius-md);
+            outline: none;
+            font-size: 14.5px;
+            transition: var(--transition);
+        }
+
+        .form-control:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 10px rgba(22, 163, 74, 0.15);
+        }
+
+        textarea.form-control {
+            height: 120px;
+            resize: none;
+        }
+
+        .upload-area {
+            background: rgba(22, 163, 74, 0.05);
+            border: 2px dashed rgba(22, 163, 74, 0.2);
+            border-radius: var(--radius-md);
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .upload-area:hover {
+            border-color: var(--primary);
+            background: rgba(22, 163, 74, 0.08);
+        }
+
+        .upload-area i {
+            font-size: 40px;
+            color: var(--primary);
+        }
+
+        #fileInput { display: none; }
+
+        .preview-img {
+            max-width: 100%;
+            max-height: 200px;
+            object-fit: cover;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-color);
+            margin-top: 10px;
+            display: none;
+        }
+
+        .tip-list p {
+            font-size: 13.5px;
+            line-height: 1.6;
+            margin-bottom: 12px;
+            color: var(--text-muted);
+        }
+
+        @media(max-width: 1100px) {
+            .report-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="logo">
+                <i class="fa-solid fa-leaf"></i>
+                <h2>Verdant</h2>
+            </div>
+            <ul>
+                <li><a href="index.html"><i class="fa-solid fa-house"></i> Home</a></li>
+                <li><a href="plant.html"><i class="fa-solid fa-seedling"></i> Plants</a></li>
+                <li><a href="scanner.html"><i class="fa-solid fa-camera"></i> AI Plant Scanner</a></li>
+                <li><a href="garden.html"><i class="fa-solid fa-tree"></i> My Garden</a></li>
+                <li><a href="water.html"><i class="fa-solid fa-droplet"></i> Water Saving</a></li>
+                <li class="active"><a href="report.html"><i class="fa-solid fa-triangle-exclamation"></i> Report Disease</a></li>
+                <li><a href="community.html"><i class="fa-solid fa-cloud-sun"></i> Season Care</a></li>
+                <li><a href="profile.html"><i class="fa-solid fa-user-circle"></i> My Profile</a></li>
+            </ul>
+        </aside>
+
+        <!-- Main Area -->
+        <main class="main">
+            <!-- Header bar -->
+            <nav>
+                <div class="search">
+                    <input type="text" placeholder="Search report options...">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </div>
+                <div class="right">
+                    <i class="fa-solid fa-moon" id="themeBtn"></i>
+                    <span id="navTemp">28°C</span>
+                    <i class="fa-regular fa-bell" id="bellIcon"></i>
+                    <img src="assets/images/user.jpg" alt="User avatar" onerror="this.src='https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=100&h=100'">
+                </div>
+            </nav>
+
+            <div class="report-grid">
+                
+                <!-- Form Box Left -->
+                <div class="content-left">
+                    <div style="margin-bottom: 25px;">
+                        <h1 style="color:var(--primary-dark); font-size:28px;">🚨 Report Plant Disease</h1>
+                        <p style="color:var(--text-muted)">Help botanists catalog anomalies by reporting plant symptoms manually.</p>
+                    </div>
+
+                    <div class="report-box">
+                        <div class="form-group">
+                            <label for="plantName">Plant Name</label>
+                            <input type="text" id="plantName" class="form-control" placeholder="E.g., Tomato, Rose Bush, Aloe Vera">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="diseaseType">Disease Type / Symptoms</label>
+                            <select id="diseaseType" class="form-control">
+                                <option value="">Select Symptoms</option>
+                                <option value="Leaf Spot">Leaf Spot</option>
+                                <option value="Early Blight">Early Blight</option>
+                                <option value="Late Blight">Late Blight</option>
+                                <option value="Yellow Leaves">Yellowing Leaves</option>
+                                <option value="Root Rot">Root Rot</option>
+                                <option value="Fungal Infection">Fungal Powder Infection</option>
+                                <option value="Pest Attack">Pest/Aphid Attack</option>
+                                <option value="Nutrient Deficiency">Nutrient Deficiency</option>
+                                <option value="Wilting Plant">Wilting/Drooping Plant</option>
+                                <option value="AI Diagnosis Required">AI Diagnosis Required</option>
+                                <option value="Unknown Problem">Unknown / Other</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Plant Image</label>
+                            <div class="upload-area" id="uploadArea">
+                                <i class="fa-solid fa-cloud-arrow-up"></i>
+                                <span style="font-weight:600; font-size:14px;">Select Image File</span>
+                                <span style="font-size:11px; color:var(--text-muted);">Supports PNG, JPG up to 10MB</span>
+                                <input type="file" id="fileInput" accept="image/*">
+                                <img id="imgPreview" class="preview-img" alt="Leaf Preview">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="description">Detailed Description</label>
+                            <textarea id="description" class="form-control" placeholder="Describe when you noticed the symptoms, watering habits, fertilizer history, etc."></textarea>
+                        </div>
+
+                        <button id="submitBtn" class="btn" style="align-self:flex-start; padding:14px 40px; font-size:15px;">
+                            <i class="fa-solid fa-paper-plane"></i> Submit Report
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Info Cards Right -->
+                <div class="content-right">
+                    <div class="glass-card">
+                        <h3 style="color:var(--primary-dark); margin-bottom:15px;">🌿 Quick Tips</h3>
+                        <div class="tip-list" id="tipBox">
+                            <p>📷 <strong>Clear Photo:</strong> Make sure the camera focuses directly on leaf spots.</p>
+                            <p>💧 <strong>Water Habits:</strong> Overwatering is the root cause of 70% of houseplant mold.</p>
+                            <p>☀️ <strong>Sunlight levels:</strong> Some molds thrive in dark, shady locations.</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Footer -->
+            <footer>
+                <div class="footer-content">
+                    <div class="footer-section">
+                        <h3>Verdant AI</h3>
+                        <p>Empowering plant parents with machine learning diagnostics, eco-friendly conservation algorithms, and direct botanical tools.</p>
+                    </div>
+                </div>
+                <div class="footer-bottom">
+                    <p>&copy; 2026 Verdant AI. All rights reserved.</p>
+                </div>
+            </footer>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="verdant.js"></script>
+    <script>
+        const plantInput = document.getElementById("plantName");
+        const diseaseSelect = document.getElementById("diseaseType");
+        const fileInput = document.getElementById("fileInput");
+        const descriptionInput = document.getElementById("description");
+        const uploadArea = document.getElementById("uploadArea");
+        const imgPreview = document.getElementById("imgPreview");
+        const submitBtn = document.getElementById("submitBtn");
+
+        // Click trigger for file input
+        uploadArea.addEventListener("click", (e) => {
+            if (e.target !== fileInput) {
+                fileInput.click();
+            }
+        });
+
+        // File preview handler
+        fileInput.addEventListener("change", function() {
+            const file = this.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                imgPreview.src = e.target.result;
+                imgPreview.style.display = "block";
+                uploadArea.querySelector("i").style.display = "none";
+                uploadArea.querySelector("span").textContent = "Change Image File";
+            };
+            reader.readAsDataURL(file);
+        });
+
+        // Form Submit
+        submitBtn.addEventListener("click", () => {
+            const plant = plantInput.value.trim();
+            const disease = diseaseSelect.value;
+            const description = descriptionInput.value.trim();
+
+            // Simple validation
+            if (!plant) {
+                showToast("Please enter a plant name", "error");
+                plantInput.focus();
+                return;
+            }
+
+            if (!disease) {
+                showToast("Please select symptoms type", "error");
+                diseaseSelect.focus();
+                return;
+            }
+
+            if (!fileInput.files.length) {
+                showToast("Please upload an image of the plant leaf", "error");
+                return;
+            }
+
+            if (!description) {
+                showToast("Please describe the plant symptoms", "error");
+                descriptionInput.focus();
+                return;
+            }
+
+            // Disable submit while processing
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Submitting...';
+
+            // Post request to Node.js backend on port 5000
+            fetch("http://localhost:5000/report", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    plantName: plant,
+                    disease: disease,
+                    image: imgPreview.src.startsWith("data:") ? "reported-leaf.jpg" : imgPreview.src
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                showToast("Report submitted successfully!", "success");
+                
+                // Clear form
+                plantInput.value = "";
+                diseaseSelect.selectedIndex = 0;
+                descriptionInput.value = "";
+                fileInput.value = "";
+                imgPreview.style.display = "none";
+                uploadArea.querySelector("i").style.display = "block";
+                uploadArea.querySelector("span").textContent = "Select Image File";
+            })
+            .catch(err => {
+                console.error(err);
+                // Even on error, show a custom UI feedback instead of alert
+                showToast("Server offline. Mocked report submission complete!", "info");
+                
+                // Reset form values anyway for user experience
+                plantInput.value = "";
+                diseaseSelect.selectedIndex = 0;
+                descriptionInput.value = "";
+                fileInput.value = "";
+                imgPreview.style.display = "none";
+                uploadArea.querySelector("i").style.display = "block";
+                uploadArea.querySelector("span").textContent = "Select Image File";
+            })
+            .finally(() => {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Submit Report';
+            });
+        });
+
+        // Cycling Quick Tips
+        const helperTips = [
+            "📷 <strong>Clear Photo:</strong> Make sure the camera focuses directly on leaf spots.",
+            "💧 <strong>Water Habits:</strong> Overwatering is the root cause of 70% of houseplant mold.",
+            "☀️ <strong>Sunlight levels:</strong> Some molds thrive in dark, shady locations.",
+            "🌿 <strong>Airflow clearance:</strong> Spacing plants protects healthy stems from contamination.",
+            "🍂 <strong>Rake fallen leaves:</strong> Fungal spores spend winters on dried ground debris."
+        ];
+
+        const tipsBox = document.getElementById("tipBox");
+        if (tipsBox) {
+            let index = 0;
+            setInterval(() => {
+                tipsBox.innerHTML = `
+                    <p>${helperTips[index % helperTips.length]}</p>
+                    <p>${helperTips[(index + 1) % helperTips.length]}</p>
+                    <p>${helperTips[(index + 2) % helperTips.length]}</p>
+                `;
+                index = (index + 1) % helperTips.length;
+            }, 6000);
+        }
+
+        // Notification Bell
+        const bell = document.getElementById("bellIcon");
+        if (bell) {
+            bell.addEventListener("click", () => {
+                showToast("🔔 No new alerts. All systems operational.", "info");
+            });
+        }
+    </script>
+</body>
+</html>
