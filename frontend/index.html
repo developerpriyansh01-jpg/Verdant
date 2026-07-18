@@ -400,6 +400,7 @@
             </footer>
         </main>
     </div>
+<button onclick="sendData()">Send</button>
 
     <!-- Global Module Script -->
     <script src="verdant.js"></script>
@@ -478,6 +479,37 @@
                 showToast("🔔 You are completely caught up! No new notifications.", "info");
             });
         }
+
+                const API_URL = "https://verdant-77nb.onrender.com";
+
+async function testBackend() {
+    const response = await fetch(`${API_URL}/api/test`);
+    const data = await response.json();
+
+    console.log(data);
+}
+
+testBackend();
+
+
+
+async function sendData() {
+    const res = await fetch("https://your-backend-name.onrender.com/api/data", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            name: "Priyansh"
+        })
+    });
+
+    const result = await res.json();
+    console.log(result);
+}
+
+
+
     </script>
 </body>
 </html>
