@@ -298,7 +298,8 @@
             registerBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Registering...';
 
             try {
-                const res = await fetch("https://verdant-77nb.onrender.com", {
+                const res = await fetch("https://verdant-77nb.onrender.com/register", {
+
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json"
