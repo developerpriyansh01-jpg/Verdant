@@ -173,7 +173,7 @@
 
     <!-- Scripts -->
     <script src="verdant.js"></script>
-    <script>
+   <script>
         const usernameInput = document.getElementById("usernameInput");
         const passwordInput = document.getElementById("passwordInput");
         const loginBtn = document.getElementById("loginBtn");
@@ -206,7 +206,7 @@
                         "Content-Type": "application/json"
                     },
                     body: JSON.stringify({
-                        username_or_email: usernameOrEmail,
+                        username: usernameOrEmail,
                         password: password
                     })
                 });
