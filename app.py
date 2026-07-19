@@ -2,7 +2,7 @@
 # Verdant AI Plant Disease Detection System
 # Flask Backend
 # ==========================================
-
+from huggingface_hub import hf_hub_download
 import os
 import datetime
 import sqlite3
@@ -92,7 +92,11 @@ PROFILE_UPLOAD_FOLDER = os.path.join(
     "profiles"
 )
 
-MODEL_PATH = "model/plant_disease_model.keras"
+MODEL_PATH = hf_hub_download(
+    repo_id="developerpriyansh01-jpg/plant-disease-model",
+    filename="plant_disease_model.keras",
+    token=os.getenv("HF_TOKEN")
+)
 
 DATASET_PATH = (
     "dataset/"
