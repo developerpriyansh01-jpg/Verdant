@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verdant – AI Plant Scanner</title>
+    <meta name="description" content="Use Verdant AI to scan plant leaves and receive complete health diagnostics, prevention tips, treatments, and watering guides.">
+    <!-- Style Sheets -->
+    <link rel="stylesheet" href="verdant.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+    <style>
+        /* Scanner specific styles */
+        .scanner-grid {
+            display: grid;
+            grid-template-columns: 1.1fr 1fr;
+            gap: 25px;
+            align-items: start;
+        }
+
+        .camera-box {
+            position: relative;
+            width: 100%;
+            height: 420px;
+            background: #000;
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            border: 2px solid var(--border-color);
+        }
+
+        .camera-box video, .camera-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        #video { display: none; }
+        #preview { display: block; }
+        #canvas { display: none; }
+
+        /* Scanner Frame overlay */
+        .scanner-overlay {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .scan-frame {
+            width: 75%;
+            height: 75%;
+            position: relative;
+        }
+
+        .scan-frame::before, .scan-frame::after {
+            content: '';
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            border-color: var(--accent);
+            border-style: solid;
+        }
+
+        .scan-frame::before { top: 0; left: 0; border-width: 3px 0 0 3px; border-radius: 8px 0 0 0; }
+        .scan-frame::after { top: 0; right: 0; border-width: 3px 3px 0 0; border-radius: 0 8px 0 0; }
+
+        .scan-corner-bl, .scan-corner-br {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            border-color: var(--accent);
+            border-style: solid;
+        }
+
+        .scan-corner-bl { bottom: 0; left: 0; border-width: 0 0 3px 3px; border-radius: 0 0 0 8px; }
+        .scan-corner-br { bottom: 0; right: 0; border-width: 0 3px 3px 0; border-radius: 0 0 8px 0; }
+
+        .scan-line {
+            position: absolute;
+            left: 12.5%;
+            width: 75%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent), transparent);
+            box-shadow: 0 0 12px var(--accent);
+            animation: scanMove 2.5s ease-in-out infinite;
+            opacity: 0;
+        }
+
+        .scan-line.active { opacity: 1; }
+
+        @keyframes scanMove {
+            0% { top: 12.5%; }
+            50% { top: 87.5%; }
+            100% { top: 12.5%; }
+        }
+
+        .camera-badge {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 20px;
+            padding: 6px 14px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #4ade80;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .camera-badge .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent);
+            animation: pulse 1.4s ease infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .btn-scan {
+            grid-column: span 3;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white;
+            font-size: 16px;
+            padding: 15px;
+            box-shadow: 0 6px 18px rgba(34,197,94,0.25);
+        }
+
+        #fileInput { display: none; }
+
+        /* Loader */
+        .scan-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 15px;
+            z-index: 10;
+        }
+
+        .scan-overlay.active { display: flex; }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(255,255,255,0.1);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Result container specifics */
+        .result-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .result-thumb {
+            width: 100%;
+            height: 180px;
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            border: 2px solid var(--border-color);
+        }
+
+        .result-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .confidence-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .conf-bar-wrap {
+            flex: 1;
+            height: 8px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .conf-bar-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            border-radius: 10px;
+            transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Enriched diagnosis grids */
+        .diag-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .diag-item {
+            background: rgba(22, 163, 74, 0.05);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 15px;
+            transition: var(--transition);
+        }
+
+        .diag-item:hover {
+            transform: translateY(-2px);
+            border-color: rgba(34, 197, 94, 0.3);
+        }
+
+        .diag-item h4 {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .diag-item h4 i { color: var(--primary); }
+
+        .diag-item p {
+            font-size: 13.5px;
+            color: var(--text-main);
+            line-height: 1.5;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-healthy { background: rgba(34, 197, 94, 0.15); color: #22c55e; }
+        .status-warn { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
+        .status-critical { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
+
+        /* History */
+        .history-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .history-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            box-shadow: var(--shadow-main);
+            transition: var(--transition);
+        }
+
+        .history-card:hover {
+            transform: translateY(-4px);
+        }
+
+        .history-card img {
+            width: 100%;
+            height: 110px;
+            object-fit: cover;
+        }
+
+        .history-info {
+            padding: 12px;
+        }
+
+        .history-info h4 {
+            font-size: 13px;
+            margin-bottom: 4px;
+        }
+
+        .history-info p {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        @media(max-width: 1200px) {
+            .scanner-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="logo">
+                <i class="fa-solid fa-leaf"></i>
+                <h2>Verdant</h2>
+            </div>
+            <ul>
+                <li><a href="index.html"><i class="fa-solid fa-house"></i> Home</a></li>
+                <li><a href="plant.html"><i class="fa-solid fa-seedling"></i> Plants</a></li>
+                <li class="active"><a href="scanner.html"><i class="fa-solid fa-camera"></i> AI Plant Scanner</a></li>
+                <li><a href="garden.html"><i class="fa-solid fa-tree"></i> My Garden</a></li>
+                <li><a href="water.html"><i class="fa-solid fa-droplet"></i> Water Saving</a></li>
+                <li><a href="report.html"><i class="fa-solid fa-triangle-exclamation"></i> Report Disease</a></li>
+                <li><a href="community.html"><i class="fa-solid fa-cloud-sun"></i> Season Care</a></li>
+                <li><a href="profile.html"><i class="fa-solid fa-user-circle"></i> My Profile</a></li>
+            </ul>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main">
+            
+            <!-- Sticky Navbar -->
+            <nav>
+                <div class="search">
+                    <input type="text" placeholder="Filter diagnostics...">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </div>
+                <div class="right">
+                    <i class="fa-solid fa-moon" id="themeBtn"></i>
+                    <span id="navTemp">28°C</span>
+                    <i class="fa-regular fa-bell" id="bellIcon"></i>
+                    <img src="assets/images/user.jpg" alt="User avatar" onerror="this.src='https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=100&h=100'">
+                </div>
+            </nav>
+
+            <div class="scanner-grid">
+                
+                <!-- Camera and Capture Left -->
+                <div class="glass-card">
+                    <p class="section-title"><i class="fa-solid fa-camera-retro"></i> Live Plant Scanner</p>
+                    
+                    <div class="camera-box" id="cameraBox">
+                        <video id="video" autoplay playsinline></video>
+                        <img id="preview" src="assets/images/plant.jpg" alt="Upload Preview" onerror="this.src='https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=600&h=420'">
+                        <canvas id="canvas"></canvas>
+                        
+                        <div class="scanner-overlay">
+                            <div class="scan-frame">
+                                <div class="scan-corner-bl"></div>
+                                <div class="scan-corner-br"></div>
+                            </div>
+                            <div class="scan-line" id="scanLine"></div>
+                        </div>
+
+                        <div class="camera-badge" id="liveBadge" style="display:none;">
+                            <span class="dot"></span> LIVE CAMERA
+                        </div>
+
+                        <div class="scan-overlay" id="scanOverlay">
+                            <div class="spinner"></div>
+                            <p style="color:white; margin-top:10px; font-weight:600;">AI Engine Analyzing Leaf...</p>
+                        </div>
+                    </div>
+
+                    <!-- Scan controls -->
+                    <div class="controls">
+                        <button class="btn btn-outline" id="cameraBtn"><i class="fa-solid fa-camera"></i> Camera</button>
+                        <button class="btn btn-outline" id="captureBtn"><i class="fa-solid fa-camera-retro"></i> Capture</button>
+                        <button class="btn btn-outline" id="uploadBtn"><i class="fa-solid fa-upload"></i> Upload</button>
+                        <input type="file" id="fileInput" accept="image/*">
+                        <button class="btn btn-scan" id="scanBtn"><i class="fa-solid fa-magnifying-glass-chart"></i> Analyze with AI</button>
+                    </div>
+                </div>
+
+                <!-- Diagnostics Right -->
+                <div class="glass-card result-panel">
+                    <p class="section-title"><i class="fa-solid fa-square-poll-horizontal"></i> Diagnosis Report</p>
+                    
+                    <div class="result-thumb">
+                        <img id="resultImg" src="assets/images/plant.jpg" alt="Result Leaf" onerror="this.src='https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=600&h=420'">
+                    </div>
+
+                    <!-- Confidence Bar -->
+                    <div class="confidence-row">
+                        <span style="font-size:12px; font-weight:600; color:var(--text-muted);">AI Confidence</span>
+                        <div class="conf-bar-wrap">
+                            <div class="conf-bar-fill" id="confBar"></div>
+                        </div>
+                        <span id="confPct" style="font-size:13px; font-weight:700; color:var(--primary);">0%</span>
+                    </div>
+
+                    <!-- Placeholder -->
+                    <div id="idlePlaceholder" style="text-align:center; padding:30px 10px; color:var(--text-muted);">
+                        <i class="fa-solid fa-leaf" style="font-size:45px; color:rgba(22, 163, 74, 0.2); margin-bottom:15px;"></i>
+                        <p>Upload a clear leaf image and click <strong>Analyze with AI</strong> to generate diagnosis details.</p>
+                    </div>
+
+                    <!-- Diagnostics details (Hidden by default) -->
+                    <div id="reportContainer" style="display:none; flex-direction:column; gap:16px;">
+                        
+                        <!-- Header Details: Health Status Only (no plant name) -->
+                        <div style="display:flex; justify-content:flex-end; align-items:center; border-bottom:1px solid var(--border-color); padding-bottom:12px;">
+                            <span id="diagHealthBadge" class="status-badge status-warn">Needs Attention ⚠️</span>
+                        </div>
+
+                        <!-- Diagnosis Metas -->
+                        <div class="diag-grid">
+                            <div class="diag-item">
+                                <h4><i class="fa-solid fa-virus"></i> Disease Name</h4>
+                                <p id="diagDisease">Early Blight</p>
+                            </div>
+                            <div class="diag-item">
+                                <h4><i class="fa-solid fa-circle-info"></i> Description</h4>
+                                <p id="diagDesc">Fungal infection attacking leaves.</p>
+                            </div>
+                            <div class="diag-item">
+                                <h4><i class="fa-solid fa-kit-medical"></i> Symptoms</h4>
+                                <p id="diagSymptoms">Concentric rings on leaves.</p>
+                            </div>
+                            <div class="diag-item">
+                                <h4><i class="fa-solid fa-circle-question"></i> Causes</h4>
+                                <p id="diagCauses">Warm damp seasons, water splashes.</p>
+                            </div>
+                            <div class="diag-item">
+                                <h4><i class="fa-solid fa-toolbox"></i> Treatment</h4>
+                                <p id="diagTreatment">Remove spotted lower leaves.</p>
+                            </div>
+                            <div class="diag-item">
+                                <h4><i class="fa-solid fa-prescription-bottle-medical"></i> Medicines</h4>
+                                <p id="diagMedicines">Chlorothalonil fungicide spray.</p>
+                            </div>
+                            <div class="diag-item">
+                                <h4><i class="fa-solid fa-seedling"></i> Organic Remedy</h4>
+                                <p id="diagOrganic">Baking soda & liquid soap wash.</p>
+                            </div>
+                            <div class="diag-item">
+                                <h4><i class="fa-solid fa-shield-halved"></i> Prevention</h4>
+                                <p id="diagPrevention">Mulching, morning watering.</p>
+                            </div>
+                        </div>
+
+                        <!-- Environmental parameters -->
+                        <h4 style="font-size:12px; text-transform:uppercase; color:var(--text-muted); margin-bottom:-5px;">Care Conditions</h4>
+                        <div class="diag-grid">
+                            <div class="diag-item" style="padding:10px 12px;">
+                                <h4><i class="fa-solid fa-droplet"></i> Water Requirements</h4>
+                                <p id="diagWater">Every alternative day</p>
+                            </div>
+                            <div class="diag-item" style="padding:10px 12px;">
+                                <h4><i class="fa-solid fa-sun"></i> Sunlight Exposure</h4>
+                                <p id="diagSunlight">6-8 Hours direct sun</p>
+                            </div>
+                            <div class="diag-item" style="padding:10px 12px;">
+                                <h4><i class="fa-solid fa-temperature-half"></i> Temperature range</h4>
+                                <p id="diagTemp">21°C - 29°C</p>
+                            </div>
+                            <div class="diag-item" style="padding:10px 12px;">
+                                <h4><i class="fa-solid fa-wind"></i> Humidity target</h4>
+                                <p id="diagHumidity">55% - 65%</p>
+                            </div>
+                        </div>
+
+                        <!-- Fertilizer recommendation -->
+                        <div class="diag-item">
+                            <h4><i class="fa-solid fa-flask"></i> Fertilizer</h4>
+                            <p id="diagFertilizer">Apply potassium fertilizer to build leaf strength.</p>
+                        </div>
+
+                        <!-- Tips box -->
+                        <div class="diag-item" style="background: rgba(34, 197, 94, 0.08); border-color: rgba(34, 197, 94, 0.2);">
+                            <h4><i class="fa-solid fa-lightbulb"></i> Recommended Actions</h4>
+                            <ul id="diagTipsList" style="list-style:none; padding-left:0; font-size:13px; line-height:1.6; display:flex; flex-direction:column; gap:6px; margin-top:5px;">
+                                <li>No actions needed.</li>
+                            </ul>
+                        </div>
+
+                        <!-- Actions -->
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:5px;">
+                            <button class="btn btn-outline" id="downloadBtn" style="background:#2563eb; color:white; border-color:#2563eb;"><i class="fa-solid fa-download"></i> Download PDF Report</button>
+                            <button class="btn" id="scanAgainBtn" style="background:var(--primary);"><i class="fa-solid fa-rotate-right"></i> Scan Again</button>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Scans History -->
+            <div class="glass-card" style="margin-top:25px;">
+                <p class="section-title" style="display:flex; justify-content:space-between; align-items:center;">
+                    <span><i class="fa-solid fa-clock-rotate-left"></i> Recent Diagnostics</span>
+                    <button class="btn btn-outline" id="clearHistoryBtn" style="font-size:11px; padding:6px 14px; border-radius:8px;"><i class="fa-solid fa-trash-can"></i> Clear All</button>
+                </p>
+                <div class="history-grid" id="historyGrid">
+                    <p style="grid-column: 1/-1; text-align:center; color:var(--text-muted); font-size:13px; padding:20px 0;">No diagnostic logs available.</p>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <footer>
+                <div class="footer-content">
+                    <div class="footer-section">
+                        <h3>Verdant AI</h3>
+                        <p>Empowering plant parents with machine learning diagnostics, eco-friendly conservation algorithms, and direct botanical tools.</p>
+                    </div>
+                </div>
+                <div class="footer-bottom">
+                    <p>&copy; 2026 Verdant AI. All rights reserved.</p>
+                </div>
+            </footer>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="verdant.js"></script>
+    <script>
+        // Camera setup variables
+        const video = document.getElementById("video");
+        const preview = document.getElementById("preview");
+        const canvas = document.getElementById("canvas");
+        const cameraBtn = document.getElementById("cameraBtn");
+        const captureBtn = document.getElementById("captureBtn");
+        const uploadBtn = document.getElementById("uploadBtn");
+        const fileInput = document.getElementById("fileInput");
+        const scanBtn = document.getElementById("scanBtn");
+        const scanAgainBtn = document.getElementById("scanAgainBtn");
+        const downloadBtn = document.getElementById("downloadBtn");
+        const clearHistoryBtn = document.getElementById("clearHistoryBtn");
+        
+        const scanLine = document.getElementById("scanLine");
+        const liveBadge = document.getElementById("liveBadge");
+        const scanOverlay = document.getElementById("scanOverlay");
+        const resultImg = document.getElementById("resultImg");
+        const idlePlaceholder = document.getElementById("idlePlaceholder");
+        const reportContainer = document.getElementById("reportContainer");
+        const historyGrid = document.getElementById("historyGrid");
+
+        let stream = null;
+        let lastReportData = null;
+        const FLASK_API_URL = "http://localhost:5001/predict";
+
+        // Open Camera
+        cameraBtn.addEventListener("click", async () => {
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: "environment" },
+                    audio: false
+                });
+                video.srcObject = stream;
+                video.style.display = "block";
+                preview.style.display = "none";
+                liveBadge.style.display = "flex";
+                showToast("Camera stream started", "info");
+            } catch (err) {
+                showToast("Cannot access camera device", "error");
+            }
+        });
+
+        // Capture photo
+        captureBtn.addEventListener("click", () => {
+            if (!stream) {
+                showToast("Please enable camera access first", "info");
+                return;
+            }
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            canvas.getContext("2d").drawImage(video, 0, 0);
+            
+            const base64Img = canvas.toDataURL("image/png");
+            preview.src = base64Img;
+            resultImg.src = base64Img;
+            
+            preview.style.display = "block";
+            video.style.display = "none";
+            liveBadge.style.display = "none";
+            
+            stream.getTracks().forEach(t => t.stop());
+            stream = null;
+            showToast("Photo captured successfully!");
+        });
+
+        // Upload click
+        uploadBtn.addEventListener("click", () => fileInput.click());
+
+        fileInput.addEventListener("change", (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                preview.src = event.target.result;
+                resultImg.src = event.target.result;
+                preview.style.display = "block";
+                video.style.display = "none";
+                liveBadge.style.display = "none";
+            };
+            reader.readAsDataURL(file);
+            showToast("Image file loaded!");
+        });
+
+        // Scan Again button resets inputs
+        scanAgainBtn.addEventListener("click", () => {
+            preview.src = "assets/images/plant.jpg";
+            resultImg.src = "assets/images/plant.jpg";
+            fileInput.value = "";
+            document.getElementById("confBar").style.width = "0%";
+            document.getElementById("confPct").textContent = "0%";
+            reportContainer.style.display = "none";
+            idlePlaceholder.style.display = "block";
+            lastReportData = null;
+            showToast("Inputs reset. Ready for next scan.");
+        });
+
+        // Scan button (Calls python Flask server)
+        scanBtn.addEventListener("click", async () => {
+            const hasInputFile = fileInput.files.length > 0;
+            const hasCapturedData = preview.src && !preview.src.endsWith("plant.jpg");
+            
+            if (!hasInputFile && !hasCapturedData) {
+                showToast("Please upload or capture an image to analyze.", "error");
+                return;
+            }
+
+            // Start scanning overlays
+            scanBtn.disabled = true;
+            scanBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Running diagnostics...';
+            scanOverlay.classList.add("active");
+            scanLine.classList.add("active");
+
+            try {
+                const formData = new FormData();
+                if (fileInput.files.length > 0) {
+                    formData.append("image", fileInput.files[0]);
+                } else {
+                    const blob = await (await fetch(preview.src)).blob();
+                    formData.append("image", blob, "captured-leaf.png");
+                }
+
+                const res = await fetch(FLASK_API_URL, {
+                    method: "POST",
+                    body: formData
+                });
+                
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || "Prediction request failed.");
+
+                renderDiagnosisReport(data);
+                saveDiagnosisHistory(data);
+                showToast("AI diagnosis generated successfully!");
+            } catch (err) {
+                console.error(err);
+                showToast("Failed to connect to Python AI. Loading fallback demo data.", "info");
+                // Fallback demo data
+                renderDiagnosisReport(getDemoReport());
+            } finally {
+                scanBtn.disabled = false;
+                scanBtn.innerHTML = '<i class="fa-solid fa-magnifying-glass-chart"></i> Analyze with AI';
+                scanOverlay.classList.remove("active");
+                scanLine.classList.remove("active");
+            }
+        });
+
+        // Fallback Demo Diagnostic Generator
+        function getDemoReport() {
+            const choices = [
+                {
+                    plant_name: "Tomato Plant",
+                    scientific_name: "Solanum lycopersicum",
+                    disease: "Early Blight",
+                    confidence: 96.42,
+                    health_status: "Needs Attention ⚠️",
+                    description: "Common tomato fungal disease that targets aging lower leaf foliage.",
+                    symptoms: "Circular brown targets with rings on lower leaves, leaf yellowing.",
+                    causes: "Splash contact from damp ground soil containing spores.",
+                    treatment: "Prune affected bottom leaves immediately.",
+                    medicines: "Apply Chlorothalonil or Mancozeb fungicide spray.",
+                    organic_solution: "Spray weekly with 1% neem oil or baking soda solution.",
+                    prevention: "Mulch soil borders, water base only, thin dense plants.",
+                    water: "Water every 2 days in the morning.",
+                    sunlight: "6-8 Hours full direct sun.",
+                    temperature: "24°C - 29°C",
+                    humidity: "Above 70% humidity speeds growth.",
+                    fertilizer: "Potassium fertilizer to strengthen leaves.",
+                    tips: [
+                        "🍂 Promptly clean pruned leaves to prevent ground mold.",
+                        "💧 Never spray water overhead onto leaves.",
+                        "🔄 Rake clean soil surfaces under foliage."
+                    ]
+                },
+                {
+                    plant_name: "Rose Bush",
+                    scientific_name: "Rosa rubiginosa",
+                    disease: "Healthy",
+                    confidence: 98.15,
+                    health_status: "Healthy ✅",
+                    description: "The rose leaf shows clean green chlorophyll walls. No leaf spot activity observed.",
+                    symptoms: "None. Bright green, clean surface structures.",
+                    causes: "Consistent light levels and dry leaves care.",
+                    treatment: "Maintain existing watering schedules.",
+                    medicines: "No medicine required.",
+                    organic_solution: "Spray organic liquid seaweed monthly as foliage vitamins.",
+                    prevention: "Maintain sanitation and proper watering habits.",
+                    water: "Water when the topsoil is dry.",
+                    sunlight: "5-6 Hours bright sun.",
+                    temperature: "18°C - 26°C",
+                    humidity: "Moderate air ventilation.",
+                    fertilizer: "Apply balanced organic compost once a month.",
+                    tips: [
+                        "🌱 Spot check leaves every few days.",
+                        "☀️ Ensure morning sun exposure.",
+                        "✂️ Prune dry spent flower stalks."
+                    ]
+                }
+            ];
+            return choices[Math.floor(Math.random() * choices.length)];
+        }
+
+        // Render diagnosis details
+        function renderDiagnosisReport(data) {
+            lastReportData = data;
+            
+            // Animate confidence bar
+            const pct = Math.min(100, Math.max(0, data.confidence));
+            document.getElementById("confPct").textContent = pct + "%";
+            setTimeout(() => {
+                document.getElementById("confBar").style.width = pct + "%";
+            }, 100);
+
+            // Populate elements (no plant name shown — health info only)
+            document.getElementById("diagDisease").textContent = data.disease || "–";
+            document.getElementById("diagDesc").textContent = data.description || "–";
+            document.getElementById("diagSymptoms").textContent = data.symptoms || "–";
+            document.getElementById("diagCauses").textContent = data.causes || "–";
+            document.getElementById("diagTreatment").textContent = data.treatment || "–";
+            document.getElementById("diagMedicines").textContent = data.medicines || "–";
+            document.getElementById("diagOrganic").textContent = data.organic_solution || "–";
+            document.getElementById("diagPrevention").textContent = data.prevention || "–";
+            document.getElementById("diagWater").textContent = data.water || "–";
+            document.getElementById("diagSunlight").textContent = data.sunlight || "–";
+            document.getElementById("diagTemp").textContent = data.temperature || "–";
+            document.getElementById("diagHumidity").textContent = data.humidity || "–";
+            document.getElementById("diagFertilizer").textContent = data.fertilizer || "–";
+            
+            // Health badge
+            const badge = document.getElementById("diagHealthBadge");
+            badge.textContent = data.health_status || "–";
+            badge.className = "status-badge";
+            const hs = (data.health_status || "").toLowerCase();
+            if (hs.includes("healthy")) badge.classList.add("status-healthy");
+            else if (hs.includes("critical")) badge.classList.add("status-critical");
+            else badge.classList.add("status-warn");
+
+            // Render tips list
+            const tipsBox = document.getElementById("diagTipsList");
+            tipsBox.innerHTML = "";
+            (data.tips || []).forEach(tip => {
+                const li = document.createElement("li");
+                li.textContent = tip;
+                tipsBox.appendChild(li);
+            });
+
+            // Toggle view panels
+            idlePlaceholder.style.display = "none";
+            reportContainer.style.display = "flex";
+        }
+
+        // History logs
+        function saveDiagnosisHistory(data) {
+            const logs = JSON.parse(localStorage.getItem("verdantHistoryLogs") || "[]");
+            logs.unshift({
+                image: resultImg.src,
+                disease: data.disease,
+                health: data.health_status,
+                conf: data.confidence,
+                time: new Date().toLocaleString()
+            });
+            localStorage.setItem("verdantHistoryLogs", JSON.stringify(logs.slice(0, 10)));
+            renderHistoryLogs();
+        }
+
+        function renderHistoryLogs() {
+            const logs = JSON.parse(localStorage.getItem("verdantHistoryLogs") || "[]");
+            if (logs.length === 0) {
+                historyGrid.innerHTML = '<p style="grid-column: 1/-1; text-align:center; color:var(--text-muted); font-size:13px; padding:20px 0;">No diagnostic logs available.</p>';
+                return;
+            }
+            historyGrid.innerHTML = "";
+            logs.forEach(log => {
+                const card = document.createElement("div");
+                card.className = "history-card";
+                
+                const isHealthy = (log.health || "").toLowerCase().includes("healthy");
+                const color = isHealthy ? "#22c55e" : (log.health || "").toLowerCase().includes("critical") ? "#ef4444" : "#f59e0b";
+                
+                card.innerHTML = `
+                    <img src="${log.image}" alt="Scan Result" onerror="this.src='https://images.unsplash.com/photo-1545241047-6083a3684587?auto=format&fit=crop&w=300&h=200'">
+                    <div class="history-info">
+                        <p style="color:${color}; font-weight:600; font-size:13px;">${log.health}</p>
+                        <p>Disease: ${log.disease}</p>
+                        <p>AI Confidence: ${log.conf}%</p>
+                        <p style="font-size:10px; margin-top:4px; color:var(--text-muted);">${log.time}</p>
+                    </div>
+                `;
+                historyGrid.appendChild(card);
+            });
+        }
+
+        // Clear history button
+        clearHistoryBtn.addEventListener("click", () => {
+            localStorage.removeItem("verdantHistoryLogs");
+            renderHistoryLogs();
+            showToast("Diagnostic history cleared");
+        });
+
+        // Download Report Text/PDF format
+        downloadBtn.addEventListener("click", () => {
+            if (!lastReportData) return;
+            const now = new Date().toLocaleString();
+            
+            let bulletedTips = "";
+            lastReportData.tips.forEach((t, i) => {
+                bulletedTips += `  - ${t}\n`;
+            });
+
+            const report = `
+===================================================
+      VERDANT AI PLANT DIAGNOSTICS REPORT
+===================================================
+Generated: ${now}
+---------------------------------------------------
+DIAGNOSIS SUMMARY:
+---------------------------------------------------
+Health Status  : ${lastReportData.health_status}
+Detected Issue : ${lastReportData.disease}
+AI Confidence  : ${lastReportData.confidence}%
+
+---------------------------------------------------
+DISEASE ANALYSIS:
+---------------------------------------------------
+Description    : ${lastReportData.description}
+Symptoms       : ${lastReportData.symptoms}
+Causes         : ${lastReportData.causes}
+Prevention     : ${lastReportData.prevention}
+
+---------------------------------------------------
+REMEDIATION & RECOVERY PLAN:
+---------------------------------------------------
+Treatment      : ${lastReportData.treatment}
+Medicines      : ${lastReportData.medicines}
+Organic Remedy : ${lastReportData.organic_solution}
+
+---------------------------------------------------
+CARE CONDITIONS:
+---------------------------------------------------
+Water          : ${lastReportData.water}
+Sunlight       : ${lastReportData.sunlight}
+Temperature    : ${lastReportData.temperature}
+Humidity       : ${lastReportData.humidity}
+Fertilizer     : ${lastReportData.fertilizer}
+
+---------------------------------------------------
+ACTION STEPS:
+---------------------------------------------------
+${bulletedTips}
+===================================================
+Powered by Verdant Smart Care.
+`;
+            
+            const blob = new Blob([report], { type: "text/plain" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `verdant-diagnostics-report-${Date.now()}.txt`;
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast("Report download triggered!");
+        });
+
+        // Init history log load
+        renderHistoryLogs();
+
+        // Notifications
+        const bell = document.getElementById("bellIcon");
+        if (bell) {
+            bell.addEventListener("click", () => {
+                showToast("🔔 System check: Active & running.", "info");
+            });
+        }
+    </script>
+</body>
+</html>

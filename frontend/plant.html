@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verdant – Plant Library</title>
+    <meta name="description" content="Explore and learn about various plants in the Verdant Plant Library. View requirements for sunlight, water, and unique benefits.">
+    <!-- Style Sheets -->
+    <link rel="stylesheet" href="verdant.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+    <style>
+        /* Categories and plant library specific styling */
+        .category-filter {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .cat-btn {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .cat-btn.active, .cat-btn:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .plant-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 25px;
+            margin-top: 20px;
+        }
+
+        .plant-card {
+            background: var(--bg-card);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            box-shadow: var(--shadow-main);
+            display: flex;
+            flex-direction: column;
+            transition: var(--transition);
+        }
+
+        .plant-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 35px rgba(22, 163, 74, 0.12);
+        }
+
+        .plant-card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .plant-card-content {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+            gap: 10px;
+        }
+
+        .plant-card h3 {
+            font-size: 18px;
+            color: var(--primary-dark);
+            margin: 0;
+        }
+        body.dark .plant-card h3 { color: #fff; }
+
+        .plant-card .scientific-name {
+            font-style: italic;
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: -8px;
+        }
+
+        .plant-card p {
+            font-size: 14px;
+            color: var(--text-muted);
+            line-height: 1.5;
+            flex-grow: 1;
+        }
+
+        /* Detail Modal */
+        .modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(8px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            padding: 20px;
+        }
+
+        .modal.open {
+            display: flex;
+            animation: fadeIn 0.3s ease forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            width: 100%;
+            max-width: 550px;
+            box-shadow: var(--shadow-main);
+            overflow: hidden;
+            position: relative;
+            transform: translateY(20px);
+            transition: var(--transition);
+        }
+
+        .modal.open .modal-content {
+            transform: translateY(0);
+            animation: slideUpModal 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        @keyframes slideUpModal {
+            from { transform: translateY(30px); }
+            to { transform: translateY(0); }
+        }
+
+        .modal-header-img {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+        }
+
+        .modal-body {
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .modal-title-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .modal-title-row h2 {
+            color: var(--primary-dark);
+            font-size: 24px;
+            margin: 0;
+        }
+        body.dark .modal-title-row h2 { color: #fff; }
+
+        .modal-close {
+            font-size: 22px;
+            color: var(--text-muted);
+            cursor: pointer;
+            background: transparent;
+            border: none;
+            padding: 5px;
+        }
+
+        .modal-close:hover {
+            color: var(--primary);
+        }
+
+        .modal-meta-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .meta-item {
+            background: rgba(22, 163, 74, 0.06);
+            border: 1px solid rgba(22, 163, 74, 0.1);
+            border-radius: var(--radius-sm);
+            padding: 10px 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 13px;
+        }
+
+        .meta-item i {
+            color: var(--primary);
+            font-size: 16px;
+        }
+
+        .meta-item strong {
+            display: block;
+            color: var(--text-muted);
+            font-weight: 500;
+            font-size: 11px;
+            text-transform: uppercase;
+        }
+
+        .modal-body p {
+            font-size: 14px;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="logo">
+                <i class="fa-solid fa-leaf"></i>
+                <h2>Verdant</h2>
+            </div>
+            <ul>
+                <li><a href="index.html"><i class="fa-solid fa-house"></i> Home</a></li>
+                <li class="active"><a href="plant.html"><i class="fa-solid fa-seedling"></i> Plants</a></li>
+                <li><a href="scanner.html"><i class="fa-solid fa-camera"></i> AI Plant Scanner</a></li>
+                <li><a href="garden.html"><i class="fa-solid fa-tree"></i> My Garden</a></li>
+                <li><a href="water.html"><i class="fa-solid fa-droplet"></i> Water Saving</a></li>
+                <li><a href="report.html"><i class="fa-solid fa-triangle-exclamation"></i> Report Disease</a></li>
+                <li><a href="community.html"><i class="fa-solid fa-cloud-sun"></i> Season Care</a></li>
+                <li><a href="profile.html"><i class="fa-solid fa-user-circle"></i> My Profile</a></li>
+            </ul>
+        </aside>
+
+        <!-- Main Area -->
+        <main class="main">
+            <!-- Header bar -->
+            <nav>
+                <div class="search">
+                    <input type="text" id="searchPlant" placeholder="Search plant library...">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </div>
+                <div class="right">
+                    <i class="fa-solid fa-moon" id="themeBtn"></i>
+                    <span id="navTemp">28°C</span>
+                    <i class="fa-regular fa-bell" id="bellIcon"></i>
+                    <img src="assets/images/user.jpg" alt="User avatar" onerror="this.src='https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=100&h=100'">
+                </div>
+            </nav>
+
+            <div class="glass-card">
+                <h2 style="color: var(--primary-dark); font-size:28px;">🌱 Plant Library</h2>
+                <p style="color: var(--text-muted); margin-bottom:25px;">Explore and learn care tips for different plant species.</p>
+
+                <!-- Category Filtering -->
+                <div class="category-filter">
+                    <button class="cat-btn active" data-category="all">All Species</button>
+                    <button class="cat-btn" data-category="indoor">Indoor</button>
+                    <button class="cat-btn" data-category="outdoor">Outdoor</button>
+                    <button class="cat-btn" data-category="medicinal">Medicinal</button>
+                    <button class="cat-btn" data-category="flowering">Flowering</button>
+                </div>
+
+                <!-- Plant grid -->
+                <div class="plant-container" id="plantGrid">
+                    
+                    <!-- Card 1 -->
+                    <div class="plant-card" data-category="indoor">
+                        <img src="assets/images/moneyplant.jpg" alt="Money Plant" onerror="this.src='https://images.unsplash.com/photo-1545241047-6083a3684587?auto=format&fit=crop&w=300&h=200'">
+                        <div class="plant-card-content">
+                            <h3>Money Plant</h3>
+                            <span class="scientific-name">Epipremnum aureum</span>
+                            <p>Hardy indoor vine known to purify indoor air and bring positive vibes.</p>
+                            <button class="view-details-btn" data-plant="Money Plant">View Care Info</button>
+                        </div>
+                    </div>
+
+                    <!-- Card 2 -->
+                    <div class="plant-card" data-category="medicinal">
+                        <img src="assets/images/tulsi.jpg" alt="Tulsi" onerror="this.src='https://images.unsplash.com/photo-1615228939096-9eba6cd74ff8?auto=format&fit=crop&w=300&h=200'">
+                        <div class="plant-card-content">
+                            <h3>Tulsi</h3>
+                            <span class="scientific-name">Ocimum tenuiflorum</span>
+                            <p>Holy basil. A sacred medicinal herb highly values in traditional remedies.</p>
+                            <button class="view-details-btn" data-plant="Tulsi">View Care Info</button>
+                        </div>
+                    </div>
+
+                    <!-- Card 3 -->
+                    <div class="plant-card" data-category="flowering">
+                        <img src="assets/images/rose.jpg" alt="Rose" onerror="this.src='https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=300&h=200'">
+                        <div class="plant-card-content">
+                            <h3>Rose</h3>
+                            <span class="scientific-name">Rosa rubiginosa</span>
+                            <p>Classic garden blossom requiring regular care and bright sunshine.</p>
+                            <button class="view-details-btn" data-plant="Rose">View Care Info</button>
+                        </div>
+                    </div>
+
+                    <!-- Card 4 -->
+                    <div class="plant-card" data-category="medicinal">
+                        <img src="assets/images/aloe.jpg" alt="Aloe Vera" onerror="this.src='https://images.unsplash.com/photo-1596547609652-9cf5d8d76921?auto=format&fit=crop&w=300&h=200'">
+                        <div class="plant-card-content">
+                            <h3>Aloe Vera</h3>
+                            <span class="scientific-name">Aloe barbadensis</span>
+                            <p>Succulent with thick gel-filled leaves. Renowned for skincare and healing.</p>
+                            <button class="view-details-btn" data-plant="Aloe Vera">View Care Info</button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <footer>
+                <div class="footer-content">
+                    <div class="footer-section">
+                        <h3>Verdant AI</h3>
+                        <p>Empowering plant parents with machine learning diagnostics, eco-friendly conservation algorithms, and direct botanical tools.</p>
+                    </div>
+                    <div class="footer-section">
+                        <h3>Quick Navigation</h3>
+                        <ul>
+                            <li><a href="index.html">Dashboard Home</a></li>
+                            <li><a href="plant.html">Plant Library</a></li>
+                            <li><a href="scanner.html">AI Leaf Scanner</a></li>
+                            <li><a href="garden.html">My Digital Garden</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="footer-bottom">
+                    <p>&copy; 2026 Verdant AI. All rights reserved.</p>
+                </div>
+            </footer>
+        </main>
+    </div>
+
+    <!-- Details Modal -->
+    <div class="modal" id="detailsModal">
+        <div class="modal-content">
+            <img id="modalImg" src="" alt="Plant image" class="modal-header-img">
+            <div class="modal-body">
+                <div class="modal-title-row">
+                    <div>
+                        <h2 id="modalName">Plant Title</h2>
+                        <span id="modalScientific" style="font-style:italic; font-size:13px; color:var(--text-muted)">Scientific Name</span>
+                    </div>
+                    <button class="modal-close" id="modalClose">&times;</button>
+                </div>
+                
+                <div class="modal-meta-grid">
+                    <div class="meta-item">
+                        <i class="fa-solid fa-droplet"></i>
+                        <div>
+                            <strong>Water Needs</strong>
+                            <span id="modalWater">Alternative Days</span>
+                        </div>
+                    </div>
+                    <div class="meta-item">
+                        <i class="fa-solid fa-sun"></i>
+                        <div>
+                            <strong>Sunlight</strong>
+                            <span id="modalSun">Full Sun</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin-top:10px;">
+                    <h4 style="margin-bottom:5px; color:var(--primary);">Key Benefits & Description</h4>
+                    <p id="modalBenefits">Plant benefits text goes here...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="verdant.js"></script>
+    <script>
+        // Database
+        const plantInfo = {
+            "Money Plant": {
+                scientific: "Epipremnum aureum",
+                water: "2-3 times per week",
+                sunlight: "Indirect Bright Light",
+                benefits: "Excellent for indoor spaces. Aids in cleaning airborne toxic materials like formaldehyde, carbon monoxide, and benzene from surrounding air. Extremely easy to propagate.",
+                img: "assets/images/moneyplant.jpg"
+            },
+            "Tulsi": {
+                scientific: "Ocimum tenuiflorum",
+                water: "Daily (Small quantity)",
+                sunlight: "5-6 hours direct sun",
+                benefits: "Highly valued in traditional herbal sciences. It offers relief from common respiratory issues, acts as a natural stress reliever, and contains deep antioxidant support.",
+                img: "assets/images/tulsi.jpg"
+            },
+            "Rose": {
+                scientific: "Rosa rubiginosa",
+                water: "Alternative morning sessions",
+                sunlight: "6-8 hours full direct sun",
+                benefits: "A classic ornamental marvel. Perfect for gardens. Rose petals are edible and often used in refreshing teas, rose oils, and natural skincare toners.",
+                img: "assets/images/rose.jpg"
+            },
+            "Aloe Vera": {
+                scientific: "Aloe barbadensis",
+                water: "Once every 7-10 days",
+                sunlight: "Bright direct sunlight",
+                benefits: "Succulent wonder. Gel from leaves offers soothing healing properties for minor skin burns, cuts, insect bites, and is deeply skin hydrating.",
+                img: "assets/images/aloe.jpg"
+            }
+        };
+
+        // Category Filter
+        const catBtns = document.querySelectorAll(".cat-btn");
+        const plantCards = document.querySelectorAll(".plant-card");
+
+        catBtns.forEach(btn => {
+            btn.addEventListener("click", () => {
+                catBtns.forEach(b => b.classList.remove("active"));
+                btn.classList.add("active");
+                
+                const cat = btn.getAttribute("data-category");
+                
+                plantCards.forEach(card => {
+                    const cardCat = card.getAttribute("data-category");
+                    if (cat === "all" || cardCat === cat) {
+                        card.style.display = "flex";
+                    } else {
+                        card.style.display = "none";
+                    }
+                });
+            });
+        });
+
+        // Search Input Filter
+        const searchInput = document.getElementById("searchPlant");
+        if (searchInput) {
+            searchInput.addEventListener("keyup", function() {
+                const query = this.value.toLowerCase();
+                plantCards.forEach(card => {
+                    const name = card.querySelector("h3").textContent.toLowerCase();
+                    const scientific = card.querySelector(".scientific-name").textContent.toLowerCase();
+                    if (name.includes(query) || scientific.includes(query)) {
+                        card.style.display = "flex";
+                    } else {
+                        card.style.display = "none";
+                    }
+                });
+            });
+        }
+
+        // Modal triggers
+        const modal = document.getElementById("detailsModal");
+        const modalClose = document.getElementById("modalClose");
+        const detailsBtns = document.querySelectorAll(".view-details-btn");
+
+        detailsBtns.forEach(btn => {
+            btn.addEventListener("click", () => {
+                const name = btn.getAttribute("data-plant");
+                const info = plantInfo[name];
+                
+                if (info) {
+                    document.getElementById("modalImg").src = info.img;
+                    document.getElementById("modalImg").onerror = function() {
+                        this.src = "https://images.unsplash.com/photo-1545241047-6083a3684587?auto=format&fit=crop&w=400&h=250";
+                    };
+                    document.getElementById("modalName").textContent = name;
+                    document.getElementById("modalScientific").textContent = info.scientific;
+                    document.getElementById("modalWater").textContent = info.water;
+                    document.getElementById("modalSun").textContent = info.sunlight;
+                    document.getElementById("modalBenefits").textContent = info.benefits;
+                    
+                    modal.classList.add("open");
+                }
+            });
+        });
+
+        modalClose.addEventListener("click", () => {
+            modal.classList.remove("open");
+        });
+
+        window.addEventListener("click", (e) => {
+            if (e.target === modal) {
+                modal.classList.remove("open");
+            }
+        });
+
+        // Notifications
+        const bell = document.getElementById("bellIcon");
+        if (bell) {
+            bell.addEventListener("click", () => {
+                showToast("🔔 No new alerts. Your plants are safe!", "info");
+            });
+        }
+    </script>
+</body>
+</html>

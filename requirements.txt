@@ -1,0 +1,12 @@
+flask
+flask-cors
+tensorflow==2.18.0
+
+numpy
+opencv-python
+pillow
+werkzeug
+pymongo
+PyJWT
+gunicorn
+huggingface_hub

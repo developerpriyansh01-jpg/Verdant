@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verdant – User Profile</title>
+    <!-- Style Sheets -->
+    <link rel="stylesheet" href="verdant.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+    <style>
+        .profile-layout {
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            gap: 30px;
+            align-items: start;
+        }
+
+        .avatar-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 30px 20px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            box-shadow: var(--shadow-main);
+        }
+
+        .avatar-wrap {
+            position: relative;
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            border: 3px solid var(--primary);
+            overflow: hidden;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
+
+        .avatar-wrap img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .avatar-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        #uploadPhotoBtn {
+            font-size: 13px;
+            padding: 8px 16px;
+            border-radius: 20px;
+        }
+
+        #removePhotoBtn {
+            font-size: 13px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            background: #ef4444;
+            color: white;
+        }
+        #removePhotoBtn:hover {
+            background: #dc2626;
+        }
+
+        #photoInput { display: none; }
+
+        .profile-details-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 35px;
+            box-shadow: var(--shadow-main);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-group.full-width {
+            grid-column: span 2;
+        }
+
+        .form-group label {
+            font-size: 13.5px;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-main);
+            color: var(--text-main);
+            border-radius: var(--radius-md);
+            outline: none;
+            font-size: 14.5px;
+            transition: var(--transition);
+        }
+
+        .form-control:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 10px rgba(22, 163, 74, 0.15);
+        }
+
+        .form-control:disabled {
+            background: transparent;
+            border-color: transparent;
+            padding-left: 0;
+            cursor: default;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        textarea.form-control {
+            height: 100px;
+            resize: none;
+        }
+
+        .profile-btn-row {
+            display: flex;
+            gap: 12px;
+            margin-top: 10px;
+            align-self: flex-start;
+        }
+
+        #cancelBtn {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+        }
+        #cancelBtn:hover {
+            background: rgba(0,0,0,0.05);
+        }
+
+        @media(max-width: 1024px) {
+            .profile-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media(max-width: 576px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            .form-group {
+                grid-column: span 2;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="logo">
+                <i class="fa-solid fa-leaf"></i>
+                <h2>Verdant</h2>
+            </div>
+            <ul>
+                <li><a href="index.html"><i class="fa-solid fa-house"></i> Home</a></li>
+                <li><a href="plant.html"><i class="fa-solid fa-seedling"></i> Plants</a></li>
+                <li><a href="scanner.html"><i class="fa-solid fa-camera"></i> AI Plant Scanner</a></li>
+                <li><a href="garden.html"><i class="fa-solid fa-tree"></i> My Garden</a></li>
+                <li><a href="water.html"><i class="fa-solid fa-droplet"></i> Water Saving</a></li>
+                <li><a href="report.html"><i class="fa-solid fa-triangle-exclamation"></i> Report Disease</a></li>
+                <li><a href="community.html"><i class="fa-solid fa-cloud-sun"></i> Season Care</a></li>
+            </ul>
+        </aside>
+
+        <!-- Main Area -->
+        <main class="main">
+            <!-- Header bar -->
+            <nav>
+                <div class="search">
+                    <input type="text" placeholder="Search profiles...">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </div>
+                <div class="right">
+                    <i class="fa-solid fa-moon" id="themeBtn"></i>
+                    <span id="navTemp">28°C</span>
+                    <i class="fa-regular fa-bell" id="bellIcon"></i>
+                    <img src="assets/images/user.jpg" alt="User avatar" id="navProfilePic" onerror="this.src='https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=100&h=100'">
+                </div>
+            </nav>
+
+            <div style="margin-bottom: 25px;">
+                <h1 style="color:var(--primary-dark); font-size:28px;">👤 My User Profile</h1>
+                <p style="color:var(--text-muted)">Update your avatar, bio settings, contact lines, and password parameters.</p>
+            </div>
+
+            <!-- Profile Dashboard Grid -->
+            <div class="profile-layout">
+                
+                <!-- Left Avatar Card -->
+                <div class="avatar-card">
+                    <div class="avatar-wrap">
+                        <img id="avatarImg" src="assets/images/user.jpg" alt="Profile avatar" onerror="this.src='https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&h=150'">
+                    </div>
+                    <div>
+                        <h3 id="avatarNameHeader" style="color:var(--primary-dark); font-size:18px;">First Last</h3>
+                        <p id="avatarUsernameHeader" style="color:var(--text-muted); font-size:13px;">@username</p>
+                    </div>
+                    
+                    <div class="avatar-actions" id="avatarEditActions" style="display:none;">
+                        <button class="btn btn-outline" id="uploadPhotoBtn"><i class="fa-solid fa-camera"></i> Change</button>
+                        <button class="btn" id="removePhotoBtn"><i class="fa-solid fa-trash-can"></i> Remove</button>
+                        <input type="file" id="photoInput" accept="image/*">
+                    </div>
+                </div>
+
+                <!-- Right Form Details Card -->
+                <div class="profile-details-card">
+                    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border-color); padding-bottom:15px; margin-bottom:10px;">
+                        <h2 style="font-size:18px; color:var(--primary-dark);">Personal Information</h2>
+                        <button class="btn" id="editProfileBtn"><i class="fa-solid fa-user-pen"></i> Edit Profile</button>
+                    </div>
+
+                    <div class="form-grid">
+                        <!-- First Name -->
+                        <div class="form-group">
+                            <label for="firstName">First Name</label>
+                            <input type="text" id="firstName" class="form-control" disabled value="">
+                        </div>
+
+                        <!-- Last Name -->
+                        <div class="form-group">
+                            <label for="lastName">Last Name</label>
+                            <input type="text" id="lastName" class="form-control" disabled value="">
+                        </div>
+
+                        <!-- Username -->
+                        <div class="form-group">
+                            <label for="username">Username</label>
+                            <input type="text" id="username" class="form-control" disabled value="">
+                        </div>
+
+                        <!-- Email -->
+                        <div class="form-group">
+                            <label for="email">Email Address</label>
+                            <input type="email" id="email" class="form-control" disabled value="">
+                        </div>
+
+                        <!-- Mobile Number -->
+                        <div class="form-group">
+                            <label for="mobile">Mobile Number</label>
+                            <input type="tel" id="mobile" class="form-control" disabled value="">
+                        </div>
+
+                        <!-- Bio -->
+                        <div class="form-group full-width">
+                            <label for="bio">Bio / Garden Description</label>
+                            <textarea id="bio" class="form-control" disabled></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Actions Row (Hidden by default) -->
+                    <div class="profile-btn-row" id="editButtonsRow" style="display:none;">
+                        <button class="btn" id="saveChangesBtn"><i class="fa-solid fa-circle-check"></i> Save Changes</button>
+                        <button class="btn" id="cancelBtn"><i class="fa-solid fa-circle-xmark"></i> Cancel</button>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Footer -->
+            <footer>
+                <div class="footer-content">
+                    <div class="footer-section">
+                        <h3>Verdant AI</h3>
+                        <p>Empowering plant parents with machine learning diagnostics, eco-friendly conservation algorithms, and direct botanical tools.</p>
+                    </div>
+                </div>
+                <div class="footer-bottom">
+                    <p>&copy; 2026 Verdant AI. All rights reserved.</p>
+                </div>
+            </footer>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="verdant.js"></script>
+    <script>
+        // DOM targets
+        const avatarImg = document.getElementById("avatarImg");
+        const avatarNameHeader = document.getElementById("avatarNameHeader");
+        const avatarUsernameHeader = document.getElementById("avatarUsernameHeader");
+        
+        const firstNameInput = document.getElementById("firstName");
+        const lastNameInput = document.getElementById("lastName");
+        const usernameInput = document.getElementById("username");
+        const emailInput = document.getElementById("email");
+        const mobileInput = document.getElementById("mobile");
+        const bioInput = document.getElementById("bio");
+
+        const editProfileBtn = document.getElementById("editProfileBtn");
+        const editButtonsRow = document.getElementById("editButtonsRow");
+        const avatarEditActions = document.getElementById("avatarEditActions");
+        
+        const saveChangesBtn = document.getElementById("saveChangesBtn");
+        const cancelBtn = document.getElementById("cancelBtn");
+
+        const photoInput = document.getElementById("photoInput");
+        const uploadPhotoBtn = document.getElementById("uploadPhotoBtn");
+        const removePhotoBtn = document.getElementById("removePhotoBtn");
+
+        let originalUserData = null;
+        let selectedPhotoFile = null;
+        let isPhotoRemoved = false;
+
+        // Load profile details on load
+        async function fetchUserProfile() {
+            const token = localStorage.getItem("verdant_token");
+            if (!token) return;
+
+            try {
+                const res = await fetch("http://localhost:5001/profile", {
+                    method: "GET",
+                    headers: {
+                        "Authorization": `Bearer ${token}`
+                    }
+                });
+
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error);
+
+                originalUserData = data.user;
+                populateForm(data.user);
+            } catch (err) {
+                console.error(err);
+                showToast("Failed to fetch user credentials.", "error");
+            }
+        }
+
+        function populateForm(user) {
+            firstNameInput.value = user.first_name || "";
+            lastNameInput.value = user.last_name || "";
+            usernameInput.value = user.username || "";
+            emailInput.value = user.email || "";
+            mobileInput.value = user.mobile || "";
+            bioInput.value = user.bio || "";
+
+            // Header titles
+            avatarNameHeader.textContent = `${user.first_name || ""} ${user.last_name || ""}`.trim() || "User Details";
+            avatarUsernameHeader.textContent = `@${user.username}`;
+
+            // Image URL mapping
+            if (user.photo_url) {
+                avatarImg.src = user.photo_url;
+            } else {
+                avatarImg.src = "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&h=150";
+            }
+        }
+
+        // Toggle Edit Mode
+        editProfileBtn.addEventListener("click", () => {
+            toggleEditMode(true);
+        });
+
+        // Cancel editing
+        cancelBtn.addEventListener("click", () => {
+            selectedPhotoFile = null;
+            isPhotoRemoved = false;
+            photoInput.value = "";
+            populateForm(originalUserData);
+            toggleEditMode(false);
+            showToast("Edits cancelled.", "info");
+        });
+
+        function toggleEditMode(editing) {
+            const inputs = [firstNameInput, lastNameInput, emailInput, mobileInput, bioInput];
+            inputs.forEach(input => input.disabled = !editing);
+            
+            // Username cannot be edited (unique identifier validation)
+            usernameInput.disabled = true;
+
+            if (editing) {
+                editProfileBtn.style.display = "none";
+                editButtonsRow.style.display = "flex";
+                avatarEditActions.style.display = "flex";
+            } else {
+                editProfileBtn.style.display = "inline-flex";
+                editButtonsRow.style.display = "none";
+                avatarEditActions.style.display = "none";
+            }
+        }
+
+        // Trigger file select
+        uploadPhotoBtn.addEventListener("click", () => photoInput.click());
+
+        photoInput.addEventListener("change", (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            selectedPhotoFile = file;
+            isPhotoRemoved = false;
+
+            // Preview local file before upload saves
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                avatarImg.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+            showToast("Photo preview updated. Remember to save changes!");
+        });
+
+        // Clear/Remove profile photo
+        removePhotoBtn.addEventListener("click", () => {
+            selectedPhotoFile = null;
+            isPhotoRemoved = true;
+            photoInput.value = "";
+            avatarImg.src = "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&h=150";
+            showToast("Photo cleared. Click Save Changes to apply.");
+        });
+
+        // Submit form data
+        saveChangesBtn.addEventListener("click", async () => {
+            const token = localStorage.getItem("verdant_token");
+            if (!token) return;
+
+            const first = firstNameInput.value.trim();
+            const last = lastNameInput.value.trim();
+            const email = emailInput.value.trim();
+            const mobile = mobileInput.value.trim();
+            const bio = bioInput.value.trim();
+
+            // Client Validation Checks
+            if (!email) {
+                showToast("Email address cannot be empty.", "error");
+                emailInput.focus();
+                return;
+            }
+
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                showToast("Please enter a valid email structure.", "error");
+                emailInput.focus();
+                return;
+            }
+
+            // Disable buttons & show loading
+            saveChangesBtn.disabled = true;
+            cancelBtn.disabled = true;
+            saveChangesBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
+
+            try {
+                // 1. Upload photo if selected
+                let newPhotoUrl = originalUserData.photo_url;
+                if (selectedPhotoFile) {
+                    const photoData = new FormData();
+                    photoData.append("photo", selectedPhotoFile);
+
+                    const photoRes = await fetch("http://localhost:5001/upload-profile-photo", {
+                        method: "POST",
+                        headers: {
+                            "Authorization": `Bearer ${token}`
+                        },
+                        body: photoData
+                    });
+
+                    const photoResult = await photoRes.json();
+                    if (!photoRes.ok) throw new Error(photoResult.error || "Failed to upload profile photo.");
+                    newPhotoUrl = photoResult.photo_url;
+                }
+
+                // 2. Put text data values
+                const profilePayload = {
+                    first_name: first,
+                    last_name: last,
+                    email: email,
+                    mobile: mobile,
+                    bio: bio
+                };
+
+                if (isPhotoRemoved) {
+                    profilePayload.photo_action = "remove";
+                    newPhotoUrl = "";
+                }
+
+                const profileRes = await fetch("http://localhost:5001/profile", {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`
+                    },
+                    body: JSON.stringify(profilePayload)
+                });
+
+                const profileResult = await profileRes.json();
+                if (!profileRes.ok) throw new Error(profileResult.error || "Failed to update profile values.");
+
+                originalUserData = profileResult.user;
+                populateForm(profileResult.user);
+
+                // Update global nav avatar if loaded
+                const navPic = document.getElementById("navProfilePic");
+                if (navPic) {
+                    navPic.src = newPhotoUrl || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=100&h=100";
+                }
+
+                showToast("Profile updated successfully!", "success");
+                toggleEditMode(false);
+            } catch (err) {
+                console.error(err);
+                showToast(err.message, "error");
+            } finally {
+                saveChangesBtn.disabled = false;
+                cancelBtn.disabled = false;
+                saveChangesBtn.innerHTML = '<i class="fa-solid fa-circle-check"></i> Save Changes';
+                selectedPhotoFile = null;
+                isPhotoRemoved = false;
+            }
+        });
+
+        // Run fetch profile details on page load
+        fetchUserProfile();
+    </script>
+</body>
+</html>
