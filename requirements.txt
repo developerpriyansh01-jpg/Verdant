@@ -9,4 +9,4 @@ werkzeug
 pymongo
 PyJWT
 gunicorn
-
+huggingface_hub
