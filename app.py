@@ -738,7 +738,7 @@ def profile(user):
 # TensorFlow Model Loading
 # ==========================================
 
-MODEL_PATH = "model/plant_disease_model.keras"
+
 
 DATASET_PATH = (
     "dataset/"

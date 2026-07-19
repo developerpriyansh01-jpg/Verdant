@@ -200,13 +200,13 @@
             loginBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Authenticating...';
 
             try {
-                const res = await fetch("http://localhost:5001/login", {
+                const res = await fetch("https://verdant-77nb.onrender.com", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json"
                     },
                     body: JSON.stringify({
-                        username_or_email: usernameOrEmail,
+                        username: usernameOrEmail,
                         password: password
                     })
                 });
