@@ -23,7 +23,9 @@ async function initAuthCheck() {
 
     // Token exists, verify/fetch profile
     try {
-        const res = await fetch("http://localhost:5001/profile", {
+        
+        const res = await fetch("https://verdant-77nb.onrender.com/profile", {
+
             method: "GET",
             headers: {
                 "Authorization": `Bearer ${token}`
